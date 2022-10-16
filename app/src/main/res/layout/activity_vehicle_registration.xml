@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingHorizontal="15dp"
+    tools:context=".activities.VehicleRegistrationActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/toolBar">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="20dp">
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/vehicle_registration"
+                android:textSize="24sp"
+                android:layout_centerHorizontal="true"
+                android:textStyle="bold"/>
+        </RelativeLayout>
+
+    </androidx.appcompat.widget.Toolbar>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp"
+            android:layout_below="@id/toolBar">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:src="@drawable/taxi"
+                android:layout_marginTop="20dp"
+                android:id="@+id/img_vehicle"
+                android:layout_centerHorizontal="true"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/img_vehicle"
+                android:id="@+id/text_uploadImage"
+                android:text="@string/tap_to_upload_your_vehicle_s_image"
+                android:layout_centerHorizontal="true"
+                android:textSize="16sp"
+                android:layout_marginTop="15dp"
+                android:textColor="@color/secondary_text"/>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="30dp"
+                android:padding="10dp"
+                android:layout_below="@id/text_uploadImage"
+                android:id="@+id/edt_name"
+                android:background="@drawable/edit_text_background"
+                android:textColor="@color/primary_text"
+                android:textColorHint="@color/secondary_text"
+                android:hint="@string/your_vehicle_s_name"
+                />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:padding="10dp"
+                android:layout_below="@id/edt_name"
+                android:id="@+id/edt_plateNumber"
+                android:background="@drawable/edit_text_background"
+                android:textColor="@color/primary_text"
+                android:textColorHint="@color/secondary_text"
+                android:hint="@string/plateNumber"
+                />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/select_your_vehicle_type"
+                android:textColor="@color/secondary_text"
+                android:textSize="18sp"
+                android:layout_below="@id/edt_plateNumber"
+                android:layout_marginTop="20dp"
+                android:id="@+id/text_select_type"/>
+
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/group_selectType"
+                android:layout_marginHorizontal="30dp"
+                android:layout_below="@id/text_select_type">
+
+                <RadioButton
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/motorbike"
+                    android:textColor="@color/primary_text"
+                    android:id="@+id/radio_motorbike"
+                    android:buttonTint="@color/blue"
+                    android:textSize="16sp"/>
+
+                <RadioButton
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/car"
+                    android:textColor="@color/primary_text"
+                    android:id="@+id/radio_car"
+                    android:buttonTint="@color/blue"
+                    android:textSize="16sp"/>
+
+            </RadioGroup>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/group_selectType"
+                android:background="@drawable/button_background"
+                android:text="@string/confirm_your_registration"
+                android:textColor="@color/white"
+                android:layout_marginTop="20dp"
+                android:textAllCaps="false"/>
+
+
+        </RelativeLayout>
+
+
+</RelativeLayout>
