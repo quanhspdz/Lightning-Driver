@@ -127,7 +127,18 @@ public class SignUpActivity extends AppCompatActivity {
                             imageUri,
                             driver,
                             gPassword);
+                    btnSignup.setEnabled(false);
                 }
+            }
+        });
+
+        txtSwitchToLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
+                startActivity(intent);
+                txtSwitchToLogin.setEnabled(false);
+                finish();
             }
         });
     }
@@ -195,6 +206,8 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
+                btnSignup.setEnabled(true);
             }
         });
     }
@@ -224,6 +237,7 @@ public class SignUpActivity extends AppCompatActivity {
                             public void onFailure(@NonNull Exception e) {
                                 Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
                                 progressDialog.dismiss();
+                                btnSignup.setEnabled(true);
                             }
                         });
             }
@@ -232,8 +246,15 @@ public class SignUpActivity extends AppCompatActivity {
             public void onFailure(@NonNull Exception e) {
                 Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
                 progressDialog.dismiss();
+                btnSignup.setEnabled(true);
             }
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        txtSwitchToLogin.setEnabled(true);
+    }
 }

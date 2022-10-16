@@ -6,6 +6,7 @@ import androidx.appcompat.widget.AppCompatButton;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -47,7 +48,18 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (checkInput()) {
                     loginUser(gEmail, gPassword);
+                    btnLogin.setEnabled(false);
                 }
+            }
+        });
+
+        txtSwitchToSignUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
+                startActivity(intent);
+                txtSwitchToSignUp.setEnabled(false);
+                finish();
             }
         });
     }
@@ -66,6 +78,7 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Toast.makeText(LoginActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+                        btnLogin.setEnabled(true);
                     }
                 });
     }
@@ -122,5 +135,12 @@ public class LoginActivity extends AppCompatActivity {
 
                     }
                 });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        txtSwitchToSignUp.setEnabled(true);
     }
 }

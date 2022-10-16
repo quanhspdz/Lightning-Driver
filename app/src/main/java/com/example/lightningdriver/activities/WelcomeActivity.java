@@ -26,7 +26,7 @@ public class WelcomeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(WelcomeActivity.this, LoginActivity.class);
                 startActivity(intent);
-                finish();
+                btnLogin.setEnabled(false);
             }
         });
 
@@ -35,9 +35,17 @@ public class WelcomeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(WelcomeActivity.this, SignUpActivity.class);
                 startActivity(intent);
-                finish();
+                btnSignup.setEnabled(false);
             }
         });
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        btnLogin.setEnabled(true);
+        btnSignup.setEnabled(true);
     }
 }
