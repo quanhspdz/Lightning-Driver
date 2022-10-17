@@ -158,6 +158,7 @@ public class LoginActivity extends AppCompatActivity {
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        driverEmails = new HashMap<>();
                         for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                             Driver driver = dataSnapshot.getValue(Driver.class);
                             if (driver != null) {
