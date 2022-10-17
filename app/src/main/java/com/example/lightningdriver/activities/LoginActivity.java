@@ -25,6 +25,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
 import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
@@ -35,6 +36,7 @@ public class LoginActivity extends AppCompatActivity {
     String gEmail, gPassword;
 
     ProgressDialog progressDialog;
+    HashMap<String, String> driverEmails;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +44,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         init();
+        getDriverEmails();
         listener();
     }
 
@@ -100,6 +103,9 @@ public class LoginActivity extends AppCompatActivity {
         } else if (!(android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches())) {
             Toast.makeText(this, "Your email is invalid", Toast.LENGTH_SHORT).show();
             return false;
+        } else if (!(driverEmails.containsKey(email))) {
+            Toast.makeText(this, "Your email does not exist!", Toast.LENGTH_SHORT).show();
+            return false;
         }
         if (password.isEmpty()) {
             Toast.makeText(this, "Please enter your password!", Toast.LENGTH_SHORT).show();
@@ -119,6 +125,7 @@ public class LoginActivity extends AppCompatActivity {
         txtSwitchToSignUp = findViewById(R.id.text_switchToSignUp);
 
         progressDialog = new ProgressDialog(LoginActivity.this);
+        driverEmails = new HashMap<>();
     }
 
     private void checkVehicleRegistration() {
@@ -137,6 +144,29 @@ public class LoginActivity extends AppCompatActivity {
                         }
                         startActivity(intent);
                         finish();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+
+    private void getDriverEmails() {
+        FirebaseDatabase.getInstance().getReference().child("Drivers")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            Driver driver = dataSnapshot.getValue(Driver.class);
+                            if (driver != null) {
+                                if (!(driver.getEmail().isEmpty())) {
+                                    driverEmails.put(driver.getEmail(), "1");
+                                }
+                            }
+                        }
+
                     }
 
                     @Override
