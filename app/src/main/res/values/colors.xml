@@ -34,4 +34,8 @@
     <color name="grey_line">#ECEAEA</color>
     <color name="blue_toolbar">#1778F2</color>
 
+    <color name="menu_orange">#FFA203</color>
+
+    <color name="ghost_white">#F5F7FF</color>
+
 </resources>
