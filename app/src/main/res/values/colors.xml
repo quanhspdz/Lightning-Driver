@@ -38,4 +38,6 @@
 
     <color name="ghost_white">#F5F7FF</color>
 
+    <color name="light_black">#191919</color>
+
 </resources>

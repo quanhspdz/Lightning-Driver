@@ -9,25 +9,128 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentTop="true">
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="145dp">
 
-<!--        <fragment-->
-<!--            android:id="@+id/fragment_maps"-->
-<!--            android:name="com.google.android.gms.maps.MapFragment"-->
+<!--        <ImageView-->
 <!--            android:layout_width="match_parent"-->
 <!--            android:layout_height="match_parent"-->
-<!--            tools:layout="@layout/fragment_maps"/>-->
+<!--            android:src="@color/green"/>-->
+
+        <fragment
+            android:id="@+id/fragment_maps"
+            android:name="com.google.android.gms.maps.MapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:layout="@layout/fragment_maps"/>
 
     </FrameLayout>
 
+    <androidx.appcompat.widget.AppCompatButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/button_white_background"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="25dp"
+        android:paddingHorizontal="10dp"
+        android:drawableStart="@drawable/ic_chart"
+        android:text=" Income"
+        android:id="@+id/btnInCome"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:textSize="20sp"/>
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/user_blue"
+        android:layout_alignParentTop="true"
+        android:id="@+id/img_profile"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/circle_image_background"
+        android:layout_marginTop="25dp"
+        android:layout_marginEnd="20dp"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/layout_bottom"
+        android:layout_centerHorizontal="true"
+        android:text="  Enable connection"
+        android:background="@drawable/button_black_background"
+        android:textColor="@color/white"
+        android:paddingHorizontal="20dp"
+        android:drawableStart="@drawable/ic_baseline_power_settings_new_24"
+        android:layout_marginBottom="15dp"/>
+
+
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="180dp"
         android:layout_alignParentBottom="true"
         android:background="@drawable/bottom_layout_background"
         android:id="@+id/layout_bottom">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:text="You are offline"
+            android:layout_marginTop="10dp"
+            android:textSize="22sp"
+            android:id="@+id/text_status"
+            android:textStyle="bold"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="5dp"
+            />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/text_status"
+            android:id="@+id/frame_line"
+            android:background="@color/grey_line"/>
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="30dp"
+            android:layout_below="@id/frame_line"
+            android:id="@+id/layout_tripInfo">
+
+            <ImageView
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:src="@drawable/car"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="20dp"
+                android:id="@+id/imgVehicle"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:layout_toEndOf="@id/imgVehicle"
+                android:text="My super vehicle"
+                android:id="@+id/text_vehicleName"
+                android:layout_marginVertical="10dp"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/text_vehicleName"
+                android:text="34-P7 6969"
+                android:textSize="16sp"
+                android:id="@+id/text_plateNumber"
+                android:layout_toEndOf="@id/imgVehicle"
+                android:layout_marginHorizontal="20dp"
+                android:textColor="@color/secondary_text"/>
+
+        </RelativeLayout>
 
     </RelativeLayout>
 
