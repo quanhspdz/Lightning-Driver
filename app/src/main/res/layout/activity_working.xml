@@ -57,6 +57,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@id/layout_bottom"
         android:layout_centerHorizontal="true"
+        android:id="@+id/buttonEnable"
         android:text="  Enable connection"
         android:background="@drawable/button_black_background"
         android:textColor="@color/white"

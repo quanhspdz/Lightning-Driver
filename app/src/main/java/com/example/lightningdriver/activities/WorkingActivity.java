@@ -2,9 +2,14 @@ package com.example.lightningdriver.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,10 +18,13 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.lightningdriver.R;
 import com.example.lightningdriver.models.CurrentPosition;
+import com.example.services.MyLocationService;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -33,30 +41,34 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.internal.Util;
 
 import java.util.Calendar;
 import java.util.Objects;
 
 public class WorkingActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    GoogleMap map;
-    Marker currentLocationMarker;
-
-    LatLng UET;
-    private FusedLocationProviderClient fusedLocationClient;
+    AppCompatButton buttonEnableConnection;
+    TextView textAvailableStatus;
 
     private static final int ACCESS_FINE_LOCATION_REQUEST_CODE = 123;
     private static final int ACCESS_COARSE_LOCATION_REQUEST_CODE = 234;
+    public static final String markerIconName = "lightning_circle";
 
-    public final String markerIconName = "lightning_circle";
+    public static GoogleMap map;
+    public static Marker currentLocationMarker;
+    static WorkingActivity instance;
+    public static WorkingActivity getInstance() {
+        return instance;
+    }
+    static LatLng lastLocation;
 
-    LocationListener locationListener;
-    LocationManager locationManager;
-    private LocationRequest locationRequest;
+    MyLocationService mLocationService;
+    private FusedLocationProviderClient fusedLocationClient;
 
-    LatLng lastLocation;
-
-    LocationCallback locationCallback;
+    Intent mServiceIntent;
+    LatLng UET;
+    boolean workingIsEnable = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,33 +76,45 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
         setContentView(R.layout.activity_working);
 
         init();
+        listener();
+    }
+
+    private void listener() {
+        buttonEnableConnection.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!workingIsEnable) {
+                    buttonEnableConnection.setText("  Connected");
+                    buttonEnableConnection.setBackgroundDrawable(getResources().getDrawable(R.drawable.button_green_background));
+                    textAvailableStatus.setText("You are online");
+                    workingIsEnable = true;
+                    startServiceFunc();
+                } else {
+                    buttonEnableConnection.setText("  Enable connection");
+                    buttonEnableConnection.setBackgroundDrawable(getResources().getDrawable(R.drawable.button_black_background));
+                    textAvailableStatus.setText("You are offline");
+                    workingIsEnable = false;
+                    stopServiceFunc();
+                }
+            }
+        });
     }
 
     private void init() {
+        buttonEnableConnection = findViewById(R.id.buttonEnable);
+        textAvailableStatus = findViewById(R.id.text_status);
+
+        instance = this;
+
         UET = new LatLng(21.038902482537342, 105.78296809797327); //Dai hoc Cong Nghe Lat Lng
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-        locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(@NonNull LocationResult locationResult) {
-                super.onLocationResult(locationResult);
-
-                updateLocationMarker(Objects.requireNonNull(locationResult.getLastLocation()));
-                updateLocationOnFirebase(Objects.requireNonNull(locationResult.getLastLocation()));
-            }
-        };
-
-        locationRequest = LocationRequest.create();
-        locationRequest.setInterval(5000);
-        locationRequest.setFastestInterval(3000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.fragment_maps);
         mapFragment.getMapAsync(this);
     }
 
-    private void updateLocationOnFirebase(Location location) {
+    public void updateLocationOnFirebase(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         if (latLng.equals(lastLocation)) {
             return;
@@ -110,7 +134,7 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
         lastLocation = latLng;
     }
 
-    private void updateLocationMarker(Location location) {
+    public void updateLocationMarker(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         if (latLng.equals(lastLocation)) {
             return;
@@ -190,28 +214,38 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
 
         requestPermission();
         markCurrentLocation();
-        startLocationUpdates();
     }
 
-    private void startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            requestPermission();
-            return;
+    private void startServiceFunc(){
+        mLocationService = new MyLocationService();
+        mServiceIntent = new Intent(this, mLocationService.getClass());
+        if (!isMyServiceRunning(mLocationService.getClass(), this)) {
+            startService(mServiceIntent);
+            Toast.makeText(this, "Service start successfully", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Service is already running", Toast.LENGTH_SHORT).show();
         }
-        fusedLocationClient.requestLocationUpdates(locationRequest,
-                locationCallback,
-                Looper.getMainLooper());
     }
 
-    private void stopLocationUpdates() {
-        fusedLocationClient.removeLocationUpdates(locationCallback);
+    private void stopServiceFunc(){
+        mLocationService = new MyLocationService();
+        mServiceIntent = new Intent(this, mLocationService.getClass());
+        if (isMyServiceRunning(mLocationService.getClass(), this)) {
+            stopService(mServiceIntent);
+            Toast.makeText(this, "Service stopped!!", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Service is already stopped!!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public boolean isMyServiceRunning(Class<?> serviceClass, Activity mActivity) {
+        ActivityManager manager = (ActivityManager) mActivity.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
