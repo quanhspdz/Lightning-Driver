@@ -1,8 +1,10 @@
 package com.example.services;
 
+import static com.example.lightningdriver.activities.WorkingActivity.currentLocationMarker;
 import static com.example.lightningdriver.activities.WorkingActivity.driverMarkerSize;
 import static com.example.lightningdriver.activities.WorkingActivity.map;
 import static com.example.lightningdriver.activities.WorkingActivity.markerIconName;
+import static com.example.lightningdriver.activities.WorkingActivity.zoomToDriver;
 
 import android.Manifest;
 import android.app.Notification;
@@ -37,6 +39,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.SphericalUtil;
 
 import java.util.ArrayList;
 
@@ -48,8 +51,7 @@ public class MyLocationService extends Service {
     FusedLocationProviderClient fusedLocationClient;
     LocationRequest locationRequest;
     LocationCallback locationCallback;
-
-    public static Location lastLocation;
+    LatLng lastLocation;
 
     private void startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -154,7 +156,13 @@ public class MyLocationService extends Service {
                     .title("You are here!")
                     .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize))));
 
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
+            if (lastLocation != null) {
+                double angle = SphericalUtil.computeHeading(lastLocation, latLng);
+                currentLocationMarker.setRotation((float) angle);
+            }
+
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomToDriver));
+            lastLocation = latLng;
         }
     }
 
@@ -163,4 +171,5 @@ public class MyLocationService extends Service {
         Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, width, height, false);
         return resizedBitmap;
     }
+
 }

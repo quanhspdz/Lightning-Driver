@@ -65,8 +65,9 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
 
     private static final int ACCESS_FINE_LOCATION_REQUEST_CODE = 123;
     private static final int ACCESS_COARSE_LOCATION_REQUEST_CODE = 234;
-    public static final String markerIconName = "your_are_here";
+    public static final String markerIconName = "motor_marker_icon";
     public static int driverMarkerSize = 160;
+    public static int zoomToDriver = 18;
 
     public static GoogleMap map;
     public static Marker currentLocationMarker;
@@ -74,7 +75,6 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
     public static WorkingActivity getInstance() {
         return instance;
     }
-    static LatLng lastLocation;
 
     MyLocationService mLocationService;
     private FusedLocationProviderClient fusedLocationClient;
@@ -191,9 +191,6 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
 
     public void updateLocationOnFirebase(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        if (latLng.equals(lastLocation)) {
-            return;
-        }
 
         CurrentPosition currentPosition = new CurrentPosition(
                 Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid(),
@@ -205,15 +202,10 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
                 .child("Driver")
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                 .setValue(currentPosition);
-
-        lastLocation = latLng;
     }
 
     public void updateLocationMarker(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        if (latLng.equals(lastLocation)) {
-            return;
-        }
 
         if (map != null) {
             currentLocationMarker.remove();
@@ -223,7 +215,7 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
                     .title("You are here!")
                     .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, 120, 120))));
 
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomToDriver));
         }
     }
 
@@ -253,7 +245,7 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
                                     .title("You are here!")
                                     //.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
                                     .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize))));
-                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
+                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomToDriver));
                         } else {
                             Toast.makeText(WorkingActivity.this, "Map is null", Toast.LENGTH_SHORT).show();
                         }
