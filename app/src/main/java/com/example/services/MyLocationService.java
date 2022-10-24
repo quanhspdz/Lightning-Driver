@@ -42,7 +42,6 @@ import java.util.ArrayList;
 
 public class MyLocationService extends Service {
 
-
     public static ArrayList<LatLng> locationArrayList = new ArrayList<LatLng>();
 
     FusedLocationProviderClient fusedLocationClient;

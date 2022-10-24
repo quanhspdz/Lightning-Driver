@@ -65,7 +65,7 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
 
     private static final int ACCESS_FINE_LOCATION_REQUEST_CODE = 123;
     private static final int ACCESS_COARSE_LOCATION_REQUEST_CODE = 234;
-    public static final String markerIconName = "lightning_circle";
+    public static final String markerIconName = "tire";
 
     public static GoogleMap map;
     public static Marker currentLocationMarker;
