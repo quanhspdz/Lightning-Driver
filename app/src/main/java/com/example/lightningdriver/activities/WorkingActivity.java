@@ -65,7 +65,8 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
 
     private static final int ACCESS_FINE_LOCATION_REQUEST_CODE = 123;
     private static final int ACCESS_COARSE_LOCATION_REQUEST_CODE = 234;
-    public static final String markerIconName = "tire";
+    public static final String markerIconName = "your_are_here";
+    public static int driverMarkerSize = 160;
 
     public static GoogleMap map;
     public static Marker currentLocationMarker;
@@ -251,7 +252,7 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
                                     .position(latLng)
                                     .title("You are here!")
                                     //.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                                    .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, 120, 120))));
+                                    .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize))));
                             map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
                         } else {
                             Toast.makeText(WorkingActivity.this, "Map is null", Toast.LENGTH_SHORT).show();

@@ -1,5 +1,6 @@
 package com.example.services;
 
+import static com.example.lightningdriver.activities.WorkingActivity.driverMarkerSize;
 import static com.example.lightningdriver.activities.WorkingActivity.map;
 import static com.example.lightningdriver.activities.WorkingActivity.markerIconName;
 
@@ -151,7 +152,7 @@ public class MyLocationService extends Service {
             WorkingActivity.currentLocationMarker = map.addMarker(new MarkerOptions()
                     .position(latLng)
                     .title("You are here!")
-                    .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, 120, 120))));
+                    .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize))));
 
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
         }
