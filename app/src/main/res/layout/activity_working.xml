@@ -100,7 +100,7 @@
             android:layout_below="@id/frame_line"
             android:id="@+id/layout_tripInfo">
 
-            <ImageView
+            <de.hdodenhof.circleimageview.CircleImageView
                 android:layout_width="65dp"
                 android:layout_height="65dp"
                 android:src="@drawable/car"

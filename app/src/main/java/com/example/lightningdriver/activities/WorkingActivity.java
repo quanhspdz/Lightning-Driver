@@ -19,11 +19,14 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.lightningdriver.R;
 import com.example.lightningdriver.models.CurrentPosition;
+import com.example.lightningdriver.models.Driver;
+import com.example.lightningdriver.models.Vehicle;
 import com.example.services.MyLocationService;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -40,16 +43,25 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.internal.Util;
+import com.squareup.picasso.Picasso;
 
+import java.io.PipedInputStream;
 import java.util.Calendar;
 import java.util.Objects;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class WorkingActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     AppCompatButton buttonEnableConnection;
     TextView textAvailableStatus;
+    CircleImageView imgProfile, imgVehicle;
+    TextView textVehicleName, textPlateNumber;
 
     private static final int ACCESS_FINE_LOCATION_REQUEST_CODE = 123;
     private static final int ACCESS_COARSE_LOCATION_REQUEST_CODE = 234;
@@ -69,6 +81,8 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
     Intent mServiceIntent;
     LatLng UET;
     boolean workingIsEnable = false;
+    Driver driver;
+    Vehicle vehicle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +90,62 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
         setContentView(R.layout.activity_working);
 
         init();
+        loadDriverInfo();
         listener();
+    }
+
+    private void loadDriverInfo() {
+        FirebaseDatabase.getInstance().getReference().child("Drivers")
+                .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        driver = snapshot.getValue(Driver.class);
+                        if (driver != null) {
+                            setDriverInfoView(driver);
+                            loadVehicleInfo(driver.getVehicleId());
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+
+    private void loadVehicleInfo(String vehicleId) {
+        FirebaseDatabase.getInstance().getReference().child("Vehicles")
+                .child(vehicleId)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        vehicle = snapshot.getValue(Vehicle.class);
+                        if (vehicle != null) {
+                            setVehicleInfoView(vehicle);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+
+    private void setVehicleInfoView(Vehicle vehicle) {
+        if (vehicle.getType().equals("car")) {
+            Picasso.get().load(vehicle.getVehicleImageUrl()).placeholder(R.drawable.shipper).resize(500, 500).into(imgVehicle);
+        } else if (vehicle.getType().equals("motorbike")) {
+            Picasso.get().load(vehicle.getVehicleImageUrl()).placeholder(R.drawable.car).resize(500, 500).into(imgVehicle);
+        }
+
+        textVehicleName.setText(vehicle.getName());
+        textPlateNumber.setText(vehicle.getPlateNumber());
+    }
+
+    private void setDriverInfoView(Driver driver) {
+        Picasso.get().load(driver.getDriverImageUrl()).placeholder(R.drawable.user_blue).resize(1000, 1000).into(imgProfile);
     }
 
     private void listener() {
@@ -103,8 +172,13 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
     private void init() {
         buttonEnableConnection = findViewById(R.id.buttonEnable);
         textAvailableStatus = findViewById(R.id.text_status);
+        textPlateNumber = findViewById(R.id.text_plateNumber);
+        textVehicleName = findViewById(R.id.text_vehicleName);
+        imgProfile = findViewById(R.id.img_profile);
+        imgVehicle = findViewById(R.id.imgVehicle);
 
         instance = this;
+        driver = new Driver();
 
         UET = new LatLng(21.038902482537342, 105.78296809797327); //Dai hoc Cong Nghe Lat Lng
 
