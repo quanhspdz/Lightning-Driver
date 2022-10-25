@@ -65,13 +65,16 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
 
     private static final int ACCESS_FINE_LOCATION_REQUEST_CODE = 123;
     private static final int ACCESS_COARSE_LOCATION_REQUEST_CODE = 234;
-    public static final String markerIconName = "motor_marker_icon";
+    public static String markerIconName = "motor_marker_icon";
+    public static final String taxiMarker = "taxi_marker";
+    public static final String motorMarker = "motor_marker_icon";
     public static int driverMarkerSize = 160;
-    public static int zoomToDriver = 18;
+    public static int zoomToDriver = 17;
 
     public static GoogleMap map;
     public static Marker currentLocationMarker;
     static WorkingActivity instance;
+
     public static WorkingActivity getInstance() {
         return instance;
     }
@@ -136,9 +139,15 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
 
     private void setVehicleInfoView(Vehicle vehicle) {
         if (vehicle.getType().equals("car")) {
+            markerIconName = taxiMarker;
             Picasso.get().load(vehicle.getVehicleImageUrl()).placeholder(R.drawable.shipper).resize(500, 500).into(imgVehicle);
         } else if (vehicle.getType().equals("motorbike")) {
+            markerIconName = motorMarker;
             Picasso.get().load(vehicle.getVehicleImageUrl()).placeholder(R.drawable.car).resize(500, 500).into(imgVehicle);
+        }
+
+        if (currentLocationMarker != null) {
+            currentLocationMarker.setIcon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize)));
         }
 
         textVehicleName.setText(vehicle.getName());
@@ -236,15 +245,20 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
                     @Override
                     public void onSuccess(Location location) {
                         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                        Float bearing = location.getBearing();
                         if (map != null) {
                             if (currentLocationMarker != null) {
-                                currentLocationMarker.remove();
+                                currentLocationMarker.setRotation(bearing);
+                                currentLocationMarker.setPosition(latLng);
+                            } else {
+                                currentLocationMarker = map.addMarker(new MarkerOptions()
+                                        .position(latLng)
+                                        .title("You are here!")
+                                        .anchor(0.5f, 0.5f)
+                                        .rotation(bearing)
+                                        .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize))));
                             }
-                            currentLocationMarker = map.addMarker(new MarkerOptions()
-                                    .position(latLng)
-                                    .title("You are here!")
-                                    //.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                                    .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize))));
+
                             map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomToDriver));
                         } else {
                             Toast.makeText(WorkingActivity.this, "Map is null", Toast.LENGTH_SHORT).show();
@@ -278,6 +292,7 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
     public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        map.getUiSettings().setRotateGesturesEnabled(false);
 
         requestPermission();
         markCurrentLocation();
@@ -315,4 +330,11 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
         return false;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        currentLocationMarker = null;
+        markCurrentLocation();
+    }
 }

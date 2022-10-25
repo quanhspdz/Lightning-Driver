@@ -84,8 +84,8 @@ public class MyLocationService extends Service {
         );
 
         locationRequest = LocationRequest.create();
-        locationRequest.setInterval(7000);
-        locationRequest.setFastestInterval(5000);
+        locationRequest.setInterval(500);
+        locationRequest.setFastestInterval(500);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         locationCallback = new LocationCallback() {
@@ -148,21 +148,22 @@ public class MyLocationService extends Service {
 
     public void updateLocationMarker(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        float bearing = location.getBearing();
+
         if (map != null) {
-            WorkingActivity.currentLocationMarker.remove();
-
-            WorkingActivity.currentLocationMarker = map.addMarker(new MarkerOptions()
-                    .position(latLng)
-                    .title("You are here!")
-                    .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize))));
-
-            if (lastLocation != null) {
-                double angle = SphericalUtil.computeHeading(lastLocation, latLng);
-                currentLocationMarker.setRotation((float) angle);
+            if (currentLocationMarker == null) {
+                WorkingActivity.currentLocationMarker = map.addMarker(new MarkerOptions()
+                        .position(latLng)
+                        .title("You are here!")
+                        .rotation(bearing)
+                        .anchor(0.5f, 0.5f)
+                        .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize))));
+            } else {
+                currentLocationMarker.setRotation(bearing);
+                currentLocationMarker.setPosition(latLng);
             }
 
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomToDriver));
-            lastLocation = latLng;
         }
     }
 
