@@ -3,7 +3,17 @@ package com.example.lightningdriver.models;
 public class CurrentPosition {
     private String driverId;
     private String position;
+    private String bearing;
+    private String vehicleType;
     private String time;
+
+    public CurrentPosition(String driverId, String position, String bearing, String vehicleType, String time) {
+        this.driverId = driverId;
+        this.position = position;
+        this.bearing = bearing;
+        this.vehicleType = vehicleType;
+        this.time = time;
+    }
 
     public CurrentPosition(String driverId, String position, String time) {
         this.driverId = driverId;
@@ -35,12 +45,19 @@ public class CurrentPosition {
         this.time = time;
     }
 
-    @Override
-    public String toString() {
-        return "CurrentPosition{" +
-                "driverId='" + driverId + '\'' +
-                ", position='" + position + '\'' +
-                ", time='" + time + '\'' +
-                '}';
+    public String getBearing() {
+        return bearing;
+    }
+
+    public void setBearing(String bearing) {
+        this.bearing = bearing;
+    }
+
+    public String getVehicleType() {
+        return vehicleType;
+    }
+
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = vehicleType;
     }
 }

@@ -196,6 +196,18 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.fragment_maps);
         mapFragment.getMapAsync(this);
+
+        if (isMyServiceRunning(MyLocationService.class, getInstance())) {
+            buttonEnableConnection.setText("  Connected");
+            buttonEnableConnection.setBackgroundDrawable(getResources().getDrawable(R.drawable.button_green_background));
+            textAvailableStatus.setText("You are online");
+            workingIsEnable = true;
+        } else {
+            buttonEnableConnection.setText("  Enable connection");
+            buttonEnableConnection.setBackgroundDrawable(getResources().getDrawable(R.drawable.button_black_background));
+            textAvailableStatus.setText("You are offline");
+            workingIsEnable = false;
+        }
     }
 
     public void updateLocationOnFirebase(Location location) {
@@ -204,6 +216,8 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
         CurrentPosition currentPosition = new CurrentPosition(
                 Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid(),
                 latLng.toString(),
+                String.valueOf(location.getBearing()),
+                vehicle.getType(),
                 Calendar.getInstance().getTime().toString()
         );
 
@@ -247,17 +261,15 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
                         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                         Float bearing = location.getBearing();
                         if (map != null) {
-                            if (currentLocationMarker != null) {
-                                currentLocationMarker.setRotation(bearing);
-                                currentLocationMarker.setPosition(latLng);
-                            } else {
-                                currentLocationMarker = map.addMarker(new MarkerOptions()
-                                        .position(latLng)
-                                        .title("You are here!")
-                                        .anchor(0.5f, 0.5f)
-                                        .rotation(bearing)
-                                        .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize))));
-                            }
+                            if (currentLocationMarker != null)
+                                currentLocationMarker.remove();
+
+                            currentLocationMarker = map.addMarker(new MarkerOptions()
+                                    .position(latLng)
+                                    .title("You are here!")
+                                    .anchor(0.5f, 0.5f)
+                                    .rotation(bearing)
+                                    .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize))));
 
                             map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomToDriver));
                         } else {
@@ -333,8 +345,5 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
     @Override
     protected void onResume() {
         super.onResume();
-
-        currentLocationMarker = null;
-        markCurrentLocation();
     }
 }

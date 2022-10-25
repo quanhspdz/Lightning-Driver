@@ -27,8 +27,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.graphics.drawable.IconCompat;
 
 
+import com.example.lightningdriver.R;
 import com.example.lightningdriver.activities.WorkingActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -52,6 +54,11 @@ public class MyLocationService extends Service {
     LocationRequest locationRequest;
     LocationCallback locationCallback;
     LatLng lastLocation;
+
+    String notificationChannelId = "1";
+    String notificationChannelName = "Background Service";
+
+    int notificationId = 1;
 
     private void startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -92,9 +99,10 @@ public class MyLocationService extends Service {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 Location location =  locationResult.getLastLocation();
-                assert location != null;
-                WorkingActivity.getInstance().updateLocationOnFirebase(location);
-                updateLocationMarker(location);
+                if (location != null) {
+                    WorkingActivity.getInstance().updateLocationOnFirebase(location);
+                    updateLocationMarker(location);
+                }
             }
         };
         startLocationUpdates();
@@ -103,12 +111,9 @@ public class MyLocationService extends Service {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void createNotificationChanel() {
-        String notificationChannelId = "Location channel id";
-        String channelName = "Background Service";
-
         NotificationChannel chan = new NotificationChannel(
                 notificationChannelId,
-                channelName,
+                notificationChannelName,
                 NotificationManager.IMPORTANCE_NONE
         );
         chan.setLightColor(Color.BLUE);
@@ -122,11 +127,27 @@ public class MyLocationService extends Service {
                 new NotificationCompat.Builder(this, notificationChannelId);
 
         Notification notification = notificationBuilder.setOngoing(true)
-                .setContentTitle("Location updates:")
+                .setContentTitle("Lightning driver is running")
                 .setPriority(NotificationManager.IMPORTANCE_MIN)
                 .setCategory(Notification.CATEGORY_SERVICE)
+                .setSmallIcon(R.drawable.lightning_circle)
                 .build();
-        startForeground(2, notification);
+        startForeground(notificationId, notification);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void pushNewNotification(String title, String message) {
+        NotificationCompat.Builder notificationBuilder =
+                new NotificationCompat.Builder(this, notificationChannelId);
+
+        Notification notification = notificationBuilder.setOngoing(true)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setPriority(NotificationManager.IMPORTANCE_MIN)
+                .setCategory(Notification.CATEGORY_SERVICE)
+                .setSmallIcon(R.drawable.lightning_circle)
+                .build();
+        startForeground(notificationId, notification);
     }
 
     @Override
@@ -151,17 +172,15 @@ public class MyLocationService extends Service {
         float bearing = location.getBearing();
 
         if (map != null) {
-            if (currentLocationMarker == null) {
-                WorkingActivity.currentLocationMarker = map.addMarker(new MarkerOptions()
-                        .position(latLng)
-                        .title("You are here!")
-                        .rotation(bearing)
-                        .anchor(0.5f, 0.5f)
-                        .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize))));
-            } else {
-                currentLocationMarker.setRotation(bearing);
-                currentLocationMarker.setPosition(latLng);
-            }
+            if (currentLocationMarker != null)
+                currentLocationMarker.remove();
+
+            WorkingActivity.currentLocationMarker = map.addMarker(new MarkerOptions()
+                    .position(latLng)
+                    .title("You are here!")
+                    .rotation(bearing)
+                    .anchor(0.5f, 0.5f)
+                    .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize))));
 
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomToDriver));
         }
@@ -171,6 +190,11 @@ public class MyLocationService extends Service {
         Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier(iconName, "drawable", getPackageName()));
         Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, width, height, false);
         return resizedBitmap;
+    }
+
+    public Bitmap getBitmapFromResource(String name) {
+        Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier(name, "drawable", getPackageName()));
+        return imageBitmap;
     }
 
 }
