@@ -85,8 +85,8 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
     Intent mServiceIntent;
     LatLng UET;
     boolean workingIsEnable = false;
-    Driver driver;
-    Vehicle vehicle;
+    public static Driver driver;
+    public static Vehicle vehicle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,10 +140,10 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
     private void setVehicleInfoView(Vehicle vehicle) {
         if (vehicle.getType().equals("car")) {
             markerIconName = taxiMarker;
-            Picasso.get().load(vehicle.getVehicleImageUrl()).placeholder(R.drawable.shipper).resize(500, 500).into(imgVehicle);
+            Picasso.get().load(vehicle.getVehicleImageUrl()).placeholder(R.drawable.shipper).resize(500, 500).centerCrop().into(imgVehicle);
         } else if (vehicle.getType().equals("motorbike")) {
             markerIconName = motorMarker;
-            Picasso.get().load(vehicle.getVehicleImageUrl()).placeholder(R.drawable.car).resize(500, 500).into(imgVehicle);
+            Picasso.get().load(vehicle.getVehicleImageUrl()).placeholder(R.drawable.car).resize(500, 500).centerCrop().into(imgVehicle);
         }
 
         if (currentLocationMarker != null) {

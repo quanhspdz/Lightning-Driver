@@ -1,9 +1,11 @@
 package com.example.services;
 
 import static com.example.lightningdriver.activities.WorkingActivity.currentLocationMarker;
+import static com.example.lightningdriver.activities.WorkingActivity.driver;
 import static com.example.lightningdriver.activities.WorkingActivity.driverMarkerSize;
 import static com.example.lightningdriver.activities.WorkingActivity.map;
 import static com.example.lightningdriver.activities.WorkingActivity.markerIconName;
+import static com.example.lightningdriver.activities.WorkingActivity.vehicle;
 import static com.example.lightningdriver.activities.WorkingActivity.zoomToDriver;
 
 import android.Manifest;
@@ -21,6 +23,7 @@ import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
+import android.provider.ContactsContract;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -31,7 +34,11 @@ import androidx.core.graphics.drawable.IconCompat;
 
 
 import com.example.lightningdriver.R;
+import com.example.lightningdriver.activities.NewTripFoundActivity;
 import com.example.lightningdriver.activities.WorkingActivity;
+import com.example.lightningdriver.models.Trip;
+import com.example.lightningdriver.tools.Const;
+import com.example.lightningdriver.tools.DecodeTool;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -41,9 +48,14 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.maps.android.SphericalUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class MyLocationService extends Service {
@@ -59,6 +71,11 @@ public class MyLocationService extends Service {
     String notificationChannelName = "Background Service";
 
     int notificationId = 1;
+
+    HashMap<String, Trip> rejectedTrips;
+    boolean isFindingTrip = true;
+
+
 
     private void startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -83,6 +100,7 @@ public class MyLocationService extends Service {
         new Notification();
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        rejectedTrips = new HashMap<>();
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) createNotificationChanel() ;
         else startForeground(
@@ -102,6 +120,9 @@ public class MyLocationService extends Service {
                 if (location != null) {
                     WorkingActivity.getInstance().updateLocationOnFirebase(location);
                     updateLocationMarker(location);
+
+                    if (isFindingTrip)
+                        getListTrips(new LatLng(location.getLatitude(), location.getLongitude()));
                 }
             }
         };
@@ -169,6 +190,7 @@ public class MyLocationService extends Service {
 
     public void updateLocationMarker(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        lastLocation = latLng;
         float bearing = location.getBearing();
 
         if (map != null) {
@@ -195,6 +217,81 @@ public class MyLocationService extends Service {
     public Bitmap getBitmapFromResource(String name) {
         Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier(name, "drawable", getPackageName()));
         return imageBitmap;
+    }
+
+    public void getListTrips(LatLng lastLocation) {
+        FirebaseDatabase.getInstance().getReference().child("Trips")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        ArrayList<Trip> listTrips = new ArrayList<>();
+
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            Trip trip = dataSnapshot.getValue(Trip.class);
+                            if (trip != null && isFindingTrip) {
+                                if (trip.getStatus().equals(Const.searching) && trip.getVehicleType().equals(vehicle.getType())
+                                    && !rejectedTrips.containsKey(trip.getId())) {
+                                    listTrips.add(trip);
+                                }
+                            }
+                        }
+
+                        if (listTrips.size() > 0) {
+                            getSuitableTrip(listTrips, lastLocation);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+
+    private void getSuitableTrip(ArrayList<Trip> listTrips, LatLng lastLocation) {
+        double minDistance = Double.MAX_VALUE;
+        Trip bestTrip = listTrips.get(0);
+
+        for (int i = 0; i < listTrips.size(); i++) {
+            Trip trip = listTrips.get(i);
+            double distance = distance(DecodeTool.getLatLngFromString(trip.getPickUpLocation()), lastLocation);
+            if (minDistance < distance) {
+                minDistance = distance;
+                bestTrip = trip;
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            pushNewNotification("Trip found: ", bestTrip.getPickUpName() + " ("+
+                    minDistance+")");
+            isFindingTrip = false;
+
+            Intent intent = new Intent(this, NewTripFoundActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("tripId", bestTrip.getId());
+            startActivity(intent);
+        }
+    }
+
+    private static double distance(LatLng start, LatLng end) {
+        double lat1 = start.latitude;
+        double lon1 = start.longitude;
+        double lat2 = end.latitude;
+        double lon2 = end.longitude;
+
+        if ((lat1 == lat2) && (lon1 == lon2)) {
+            return 0;
+        }
+        else {
+            double theta = lon1 - lon2;
+            double dist = Math.sin(Math.toRadians(lat1)) * Math.sin(Math.toRadians(lat2)) + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.cos(Math.toRadians(theta));
+            dist = Math.acos(dist);
+            dist = Math.toDegrees(dist);
+            dist = dist * 60 * 1.1515;
+            dist = dist * 1.609344;
+
+            return (dist);
+        }
     }
 
 }
