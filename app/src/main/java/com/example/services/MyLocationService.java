@@ -72,7 +72,7 @@ public class MyLocationService extends Service {
 
     int notificationId = 1;
 
-    HashMap<String, Trip> rejectedTrips;
+    public static HashMap<String, Trip> rejectedTrips;
     boolean isFindingTrip = true;
 
 
@@ -126,6 +126,7 @@ public class MyLocationService extends Service {
                 }
             }
         };
+
         startLocationUpdates();
     }
 

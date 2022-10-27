@@ -9,14 +9,22 @@ import androidx.appcompat.widget.AppCompatButton;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
 import android.widget.TextView;
 
 import com.example.lightningdriver.R;
 import com.example.lightningdriver.models.Trip;
+import com.example.lightningdriver.tools.Const;
+import com.example.services.MyLocationService;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.Objects;
 
 public class NewTripFoundActivity extends AppCompatActivity {
     TextView textMoney, textDistance, textVehicleType, textPaymentMethod,
@@ -26,6 +34,8 @@ public class NewTripFoundActivity extends AppCompatActivity {
 
     Trip trip;
 
+    boolean waitingStatusUpdated = false, searchingStatusUpdated = false, driverFoundUpdated = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +43,54 @@ public class NewTripFoundActivity extends AppCompatActivity {
 
         init();
         getTripInfo();
+        listener();
+    }
+
+    private void listener() {
+        buttonAccept.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!searchingStatusUpdated) {
+                    searchingStatusUpdated = true;
+                    updateTripStatusAndDriver(Const.driverFound);
+                }
+
+                Intent intent = new Intent(NewTripFoundActivity.this, PickUpActivity.class);
+                intent.putExtra("tripId", trip.getId());
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        buttonReject.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!searchingStatusUpdated) {
+                    searchingStatusUpdated = true;
+                    updateTripStatus(Const.searching);
+                }
+
+                MyLocationService.rejectedTrips.put(trip.getId(), trip);
+                finish();
+            }
+        });
+    }
+
+    private void updateTripStatus(String status) {
+        trip.setStatus(status);
+
+        FirebaseDatabase.getInstance().getReference().child("Trips")
+                .child(trip.getId())
+                .setValue(trip);
+    }
+
+    private void updateTripStatusAndDriver(String status) {
+        trip.setStatus(status);
+        trip.setDriverId(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid());
+
+        FirebaseDatabase.getInstance().getReference().child("Trips")
+                .child(trip.getId())
+                .setValue(trip);
     }
 
     private void getTripInfo() {
@@ -67,6 +125,11 @@ public class NewTripFoundActivity extends AppCompatActivity {
         textDropOff.setText(trip.getDropOffName());
 
         startTimeCounter();
+
+        if (!waitingStatusUpdated) {
+            updateTripStatus(Const.waitingForAccept);
+            waitingStatusUpdated = true;
+        }
     }
 
     private void startTimeCounter() {
@@ -86,6 +149,11 @@ public class NewTripFoundActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     timeRemain[0]--;
+                }
+
+                if (!searchingStatusUpdated) {
+                    updateTripStatus(Const.searching);
+                    searchingStatusUpdated = true;
                 }
                 finish();
             }
