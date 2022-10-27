@@ -50,8 +50,8 @@ public class NewTripFoundActivity extends AppCompatActivity {
         buttonAccept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!searchingStatusUpdated) {
-                    searchingStatusUpdated = true;
+                if (!driverFoundUpdated) {
+                    driverFoundUpdated = true;
                     updateTripStatusAndDriver(Const.driverFound);
                 }
 
@@ -67,6 +67,8 @@ public class NewTripFoundActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (!searchingStatusUpdated) {
                     searchingStatusUpdated = true;
+                    MyLocationService.isFindingTrip = true;
+                    MyLocationService.rejectedTrips.put(trip.getId(), trip);
                     updateTripStatus(Const.searching);
                 }
 
@@ -150,10 +152,11 @@ public class NewTripFoundActivity extends AppCompatActivity {
                     }
                     timeRemain[0]--;
                 }
-
-                if (!searchingStatusUpdated) {
-                    updateTripStatus(Const.searching);
+                if (!searchingStatusUpdated && !driverFoundUpdated) {
                     searchingStatusUpdated = true;
+                    MyLocationService.isFindingTrip = true;
+                    MyLocationService.rejectedTrips.put(trip.getId(), trip);
+                    updateTripStatus(Const.searching);
                 }
                 finish();
             }
