@@ -338,8 +338,8 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStop() {
+        super.onStop();
         isRunning = false;
     }
 }

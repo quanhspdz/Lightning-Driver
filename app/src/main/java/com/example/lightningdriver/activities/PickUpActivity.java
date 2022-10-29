@@ -2,6 +2,7 @@ package com.example.lightningdriver.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
@@ -11,13 +12,17 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.lightningdriver.R;
 import com.example.lightningdriver.models.Driver;
+import com.example.lightningdriver.models.Passenger;
 import com.example.lightningdriver.models.Trip;
 import com.example.lightningdriver.models.Vehicle;
 import com.example.lightningdriver.tools.Const;
+import com.example.lightningdriver.tools.DecodeTool;
 import com.example.services.MyLocationService;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -42,7 +47,9 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallback {
-    Trip trip;
+    TextView textPassengerName, textPickUp, textMoney, textPaymentMethod;
+    RelativeLayout layoutCall, layoutChat;
+    AppCompatButton buttonArrived;
 
     public static GoogleMap map;
     public static Marker currentLocationMarker;
@@ -53,6 +60,8 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     public static String markerIconName = "motor_marker_icon";
     public static final String taxiMarker = "taxi_marker";
     public static final String motorMarker = "motor_marker_icon";
+    private static final String pickUpMarkerName = "pick_up_marker";
+    private static final String desMarkerName = "des_marker";
     public static int driverMarkerSize = 160;
     public static int zoomToDriver = 17;
 
@@ -61,9 +70,12 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
 
     Intent mServiceIntent;
     LatLng UET;
+    String tripId;
     boolean workingIsEnable = false;
     public static Driver driver;
     public static Vehicle vehicle;
+    public static Trip trip;
+    public static Passenger passenger;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,10 +83,64 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
         setContentView(R.layout.activity_pick_up);
 
         init();
+        getTripInfo();
+    }
 
+    private void getTripInfo() {
+        Intent intent = getIntent();
+        tripId = intent.getStringExtra("tripId");
+        if (tripId != null) {
+            FirebaseDatabase.getInstance().getReference().child("Trips")
+                    .child(tripId)
+                    .addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            trip = snapshot.getValue(Trip.class);
+                            if (trip != null) {
+                                loadTripInfo(trip);
+                                markPickUpAndDropOff(trip);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+        }
+    }
+
+    private void loadTripInfo(Trip trip) {
+        textPickUp.setText(trip.getPickUpName());
+        textMoney.setText(trip.getCost());
+
+        FirebaseDatabase.getInstance().getReference().child("Passengers")
+                .child(trip.getPassengerId())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        passenger = snapshot.getValue(Passenger.class);
+                        if (passenger != null) {
+                            textPassengerName.setText(passenger.getName());
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
     }
 
     public void init() {
+        textMoney = findViewById(R.id.text_money);
+        textPassengerName = findViewById(R.id.text_passengerName);
+        textPickUp = findViewById(R.id.text_pick_up_location);
+        textPaymentMethod = findViewById(R.id.text_paymentMethod);
+        layoutCall = findViewById(R.id.layout_call);
+        layoutChat = findViewById(R.id.layout_chat);
+        buttonArrived = findViewById(R.id.button_arrived);
+
         UET = new LatLng(21.038902482537342, 105.78296809797327); //Dai hoc Cong Nghe Lat Lng
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -88,6 +154,8 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
         map = googleMap;
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         map.getUiSettings().setRotateGesturesEnabled(false);
+
+        map.getUiSettings().setMyLocationButtonEnabled(true);
 
         markCurrentLocation();
     }
@@ -142,6 +210,26 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
         );
     }
 
+
+    private void markPickUpAndDropOff(Trip trip) {
+        LatLng pickup = DecodeTool.getLatLngFromString(trip.getPickUpLocation());
+        LatLng dropOff = DecodeTool.getLatLngFromString(trip.getDropOffLocation());
+
+        map.addMarker(new MarkerOptions()
+                .position(pickup)
+                .title("Pick-up")
+                .anchor(0.5f, 0.5f)
+                .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(pickUpMarkerName, driverMarkerSize, driverMarkerSize))));
+
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(pickup, zoomToDriver));
+
+        map.addMarker(new MarkerOptions()
+                .position(dropOff)
+                .title("Drop-off")
+                .anchor(0.5f, 0.5f)
+                .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(desMarkerName, driverMarkerSize, driverMarkerSize))));
+
+    }
 
     @Override
     protected void onStart() {

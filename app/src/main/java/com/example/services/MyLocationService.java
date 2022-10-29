@@ -134,8 +134,9 @@ public class MyLocationService extends Service {
                 Location location =  locationResult.getLastLocation();
                 if (location != null) {
                     updateLocationOnFirebase(location);
-                    if (WorkingActivity.isRunning)
+                    if (WorkingActivity.isRunning) {
                         updateLocationMarkerOnWorkingAct(location);
+                    }
                     if(PickUpActivity.isRunning)
                         updateLocationMarkerOnPickUpAct(location);
 
@@ -164,7 +165,6 @@ public class MyLocationService extends Service {
                     .anchor(0.5f, 0.5f)
                     .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize))));
 
-            PickUpActivity.map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomToDriver));
         }
     }
 
