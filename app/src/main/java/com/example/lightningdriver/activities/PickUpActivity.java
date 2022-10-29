@@ -547,10 +547,12 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     protected void onStart() {
         super.onStart();
         isRunning = true;
+        MyLocationService.isFindingTrip = false;
 
         if (!(isMyServiceRunning(MyLocationService.class, this))) {
             startServiceFunc();
         }
+
         loadCurrentApiKey();
         loadDriverInfo();
         getTripInfo();
@@ -578,5 +580,12 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     protected void onStop() {
         super.onStop();
         isRunning = false;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+        MainActivity.pickUpActivityIsStart = false;
     }
 }

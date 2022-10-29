@@ -29,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
 
     ProgressDialog progressDialog;
 
+    public static boolean pickUpActivityIsStart = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,32 +56,32 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String driverId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
                 progressDialog.show();
-                if (driverId != null) {
-                    FirebaseDatabase.getInstance().getReference().child("Trips")
-                            .addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                                        Trip trip = dataSnapshot.getValue(Trip.class);
-                                        if (trip != null) {
-                                            if (trip.getDriverId() != null) {
-                                                if (trip.getDriverId().equals(driverId) && trip.getStatus().equals(Const.waitingToPickUp)) {
-                                                    Intent intent = new Intent(MainActivity.this, PickUpActivity.class);
-                                                    intent.putExtra("tripId", trip.getId());
-                                                    startActivity(intent);
-                                                    progressDialog.dismiss();
-                                                }
+                FirebaseDatabase.getInstance().getReference().child("Trips")
+                        .addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                    Trip trip = dataSnapshot.getValue(Trip.class);
+                                    if (trip != null) {
+                                        if (trip.getDriverId() != null) {
+                                            if (trip.getDriverId().equals(driverId) && trip.getStatus().equals(Const.waitingToPickUp)
+                                                && !pickUpActivityIsStart) {
+                                                Intent intent = new Intent(MainActivity.this, PickUpActivity.class);
+                                                intent.putExtra("tripId", trip.getId());
+                                                pickUpActivityIsStart = true;
+                                                startActivity(intent);
+                                                progressDialog.dismiss();
                                             }
                                         }
                                     }
                                 }
+                            }
 
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
 
-                                }
-                            });
-                }
+                            }
+                        });
             }
         });
     }

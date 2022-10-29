@@ -144,7 +144,7 @@ public class MyLocationService extends Service {
                         PickUpActivity.driverCurrentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
                     }
 
-                    if (isFindingTrip)
+                    if (isFindingTrip && !PickUpActivity.isRunning)
                         getListTrips(new LatLng(location.getLatitude(), location.getLongitude()));
                 }
             }
@@ -281,7 +281,7 @@ public class MyLocationService extends Service {
                             }
                         }
 
-                        if (listTrips.size() > 0) {
+                        if (listTrips.size() > 0 && isFindingTrip && !PickUpActivity.isRunning) {
                             getSuitableTrip(listTrips, lastLocation);
                         }
                     }
