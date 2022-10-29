@@ -78,6 +78,7 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
     public static WorkingActivity getInstance() {
         return instance;
     }
+    public static boolean isRunning = false;
 
     MyLocationService mLocationService;
     private FusedLocationProviderClient fusedLocationClient;
@@ -210,23 +211,6 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
         }
     }
 
-    public void updateLocationOnFirebase(Location location) {
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-
-        CurrentPosition currentPosition = new CurrentPosition(
-                Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid(),
-                latLng.toString(),
-                String.valueOf(location.getBearing()),
-                vehicle.getType(),
-                Calendar.getInstance().getTime().toString()
-        );
-
-        FirebaseDatabase.getInstance().getReference().child("CurrentPosition")
-                .child("Driver")
-                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                .setValue(currentPosition);
-    }
-
     public void updateLocationMarker(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
 
@@ -345,5 +329,17 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
     @Override
     protected void onResume() {
         super.onResume();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        isRunning = true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        isRunning = false;
     }
 }

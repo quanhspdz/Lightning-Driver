@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.lightningdriver.R;
 import com.example.lightningdriver.models.Trip;
@@ -71,8 +72,6 @@ public class NewTripFoundActivity extends AppCompatActivity {
                     MyLocationService.rejectedTrips.put(trip.getId(), trip);
                     updateTripStatus(Const.searching);
                 }
-
-                MyLocationService.rejectedTrips.put(trip.getId(), trip);
                 finish();
             }
         });
