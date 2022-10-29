@@ -8,6 +8,7 @@ public class Const {
 
     public static final String searching = "searchingForDriver";
     public static final String waitingForAccept = "waitingDriverAccept";
+    public static final String waitingToPickUp = "waitingToPickUp";
     public static final String driverFound = "driverFound";
     public static final String onGoing = "onGoing";
     public static final String canceled = "canceled";

@@ -53,7 +53,7 @@ public class NewTripFoundActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (!driverFoundUpdated) {
                     driverFoundUpdated = true;
-                    updateTripStatusAndDriver(Const.driverFound);
+                    updateTripStatusAndDriver(Const.waitingToPickUp);
                 }
 
                 Intent intent = new Intent(NewTripFoundActivity.this, PickUpActivity.class);

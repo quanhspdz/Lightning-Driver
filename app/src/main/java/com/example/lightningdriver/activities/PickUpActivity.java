@@ -6,12 +6,19 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,14 +53,19 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallback {
-    TextView textPassengerName, textPickUp, textMoney, textPaymentMethod;
-    RelativeLayout layoutCall, layoutChat;
+    TextView textPassengerName, textPickUp, textMoney, textPaymentMethod, textStatus;
+    RelativeLayout layoutCall, layoutChat, layoutTripInfo, layoutBottom;
     AppCompatButton buttonArrived;
+    CircleImageView imgFocusOnMe;
 
     public static GoogleMap map;
     public static Marker currentLocationMarker;
     public static boolean isRunning = false;
+    public static boolean bottomLayoutIsVisible = false;
+    public static boolean focusOnMe = true;
 
     private static final int ACCESS_FINE_LOCATION_REQUEST_CODE = 123;
     private static final int ACCESS_COARSE_LOCATION_REQUEST_CODE = 234;
@@ -84,6 +96,35 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
 
         init();
         getTripInfo();
+        listener();
+    }
+
+    private void listener() {
+        textStatus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (bottomLayoutIsVisible) {
+                    bottomLayoutIsVisible = false;
+                    layoutTripInfo.setVisibility(View.GONE);
+                } else {
+                    bottomLayoutIsVisible = true;
+                    layoutTripInfo.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        imgFocusOnMe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (focusOnMe) {
+                    focusOnMe = false;
+                    imgFocusOnMe.setImageResource(R.drawable.unfocus);
+                } else {
+                    focusOnMe = true;
+                    imgFocusOnMe.setImageResource(R.drawable.focus);
+                }
+            }
+        });
     }
 
     private void getTripInfo() {
@@ -137,9 +178,16 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
         textPassengerName = findViewById(R.id.text_passengerName);
         textPickUp = findViewById(R.id.text_pick_up_location);
         textPaymentMethod = findViewById(R.id.text_paymentMethod);
+        textStatus = findViewById(R.id.text_status);
+
         layoutCall = findViewById(R.id.layout_call);
         layoutChat = findViewById(R.id.layout_chat);
+        layoutTripInfo = findViewById(R.id.layout_tripInfo);
+        layoutBottom = findViewById(R.id.layout_bottom);
+
         buttonArrived = findViewById(R.id.button_arrived);
+
+        imgFocusOnMe = findViewById(R.id.img_focusOnMe);
 
         UET = new LatLng(21.038902482537342, 105.78296809797327); //Dai hoc Cong Nghe Lat Lng
 
@@ -231,10 +279,46 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
 
     }
 
+    private void startServiceFunc(){
+        mLocationService = new MyLocationService();
+        mServiceIntent = new Intent(this, mLocationService.getClass());
+        if (!isMyServiceRunning(mLocationService.getClass(), this)) {
+            startService(mServiceIntent);
+            Toast.makeText(this, "Service start successfully", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Service is already running", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void stopServiceFunc(){
+        mLocationService = new MyLocationService();
+        mServiceIntent = new Intent(this, mLocationService.getClass());
+        if (isMyServiceRunning(mLocationService.getClass(), this)) {
+            stopService(mServiceIntent);
+            Toast.makeText(this, "Service stopped!!", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Service is already stopped!!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public boolean isMyServiceRunning(Class<?> serviceClass, Activity mActivity) {
+        ActivityManager manager = (ActivityManager) mActivity.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
         isRunning = true;
+
+        if (!(isMyServiceRunning(MyLocationService.class, this))) {
+            startServiceFunc();
+        }
     }
 
     @Override

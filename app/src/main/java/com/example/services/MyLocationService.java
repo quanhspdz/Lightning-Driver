@@ -165,6 +165,8 @@ public class MyLocationService extends Service {
                     .anchor(0.5f, 0.5f)
                     .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize))));
 
+            if (PickUpActivity.focusOnMe)
+                PickUpActivity.map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomToDriver));
         }
     }
 
