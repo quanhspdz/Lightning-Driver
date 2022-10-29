@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -25,6 +26,8 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
 
     FrameLayout btnWorking, buttonCurrentOrder;
+
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String driverId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+                progressDialog.show();
                 if (driverId != null) {
                     FirebaseDatabase.getInstance().getReference().child("Trips")
                             .addValueEventListener(new ValueEventListener() {
@@ -63,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
                                                     Intent intent = new Intent(MainActivity.this, PickUpActivity.class);
                                                     intent.putExtra("tripId", trip.getId());
                                                     startActivity(intent);
+                                                    progressDialog.dismiss();
                                                 }
                                             }
                                         }
@@ -82,6 +87,9 @@ public class MainActivity extends AppCompatActivity {
     private void init() {
         btnWorking = findViewById(R.id.buttonWorking);
         buttonCurrentOrder = findViewById(R.id.buttonCurrentOrder);
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Loading...");
     }
 
     private void setStatusBarColor() {

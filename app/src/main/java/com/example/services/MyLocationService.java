@@ -133,12 +133,16 @@ public class MyLocationService extends Service {
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 Location location =  locationResult.getLastLocation();
                 if (location != null) {
-                    updateLocationOnFirebase(location);
+                    if (driver != null && vehicle != null)
+                        updateLocationOnFirebase(location);
+
                     if (WorkingActivity.isRunning) {
                         updateLocationMarkerOnWorkingAct(location);
                     }
-                    if(PickUpActivity.isRunning)
+                    if(PickUpActivity.isRunning) {
                         updateLocationMarkerOnPickUpAct(location);
+                        PickUpActivity.driverCurrentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                    }
 
                     if (isFindingTrip)
                         getListTrips(new LatLng(location.getLatitude(), location.getLongitude()));

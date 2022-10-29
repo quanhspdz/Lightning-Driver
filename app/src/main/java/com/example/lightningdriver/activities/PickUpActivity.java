@@ -1,19 +1,26 @@
 package com.example.lightningdriver.activities;
 
+import static com.example.lightningdriver.activities.WorkingActivity.zoomToDriver;
+import static java.lang.Thread.sleep;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.Animation;
@@ -23,7 +30,16 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.lightningdriver.R;
+import com.example.lightningdriver.models.CurrentPosition;
 import com.example.lightningdriver.models.Driver;
 import com.example.lightningdriver.models.Passenger;
 import com.example.lightningdriver.models.Trip;
@@ -39,8 +55,11 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -49,7 +68,15 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.maps.android.PolyUtil;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -65,7 +92,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     public static Marker currentLocationMarker;
     public static boolean isRunning = false;
     public static boolean bottomLayoutIsVisible = false;
-    public static boolean focusOnMe = true;
+    public static boolean focusOnMe = false;
 
     private static final int ACCESS_FINE_LOCATION_REQUEST_CODE = 123;
     private static final int ACCESS_COARSE_LOCATION_REQUEST_CODE = 234;
@@ -73,9 +100,12 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     public static final String taxiMarker = "taxi_marker";
     public static final String motorMarker = "motor_marker_icon";
     private static final String pickUpMarkerName = "pick_up_marker";
-    private static final String desMarkerName = "des_marker";
+    private static final String desMarkerName = "flag";
     public static int driverMarkerSize = 160;
+    public static int locationMarkerSize = 120;
     public static int zoomToDriver = 17;
+    public static String MAPS_API_KEY;
+    public static float polyWidth = 14;
 
     MyLocationService mLocationService;
     private FusedLocationProviderClient fusedLocationClient;
@@ -84,10 +114,17 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     LatLng UET;
     String tripId;
     boolean workingIsEnable = false;
+    boolean tripIsLoaded = false, driverPosIsLoaded = false, keyIsLoaded = false;
     public static Driver driver;
     public static Vehicle vehicle;
     public static Trip trip;
     public static Passenger passenger;
+    public static CurrentPosition driverCurrentPosition;
+    public static LatLng driverCurrentLatLng;
+
+    private Polyline pickupPolyline, dropOffPolyLine;
+
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +132,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
         setContentView(R.layout.activity_pick_up);
 
         init();
+        progressDialog.show();
         getTripInfo();
         listener();
     }
@@ -118,13 +156,35 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
             public void onClick(View v) {
                 if (focusOnMe) {
                     focusOnMe = false;
+                    if (tripIsLoaded && driverPosIsLoaded) {
+                        zoomToPickUpRoute();
+                    }
                     imgFocusOnMe.setImageResource(R.drawable.unfocus);
                 } else {
                     focusOnMe = true;
                     imgFocusOnMe.setImageResource(R.drawable.focus);
+                    zoomToDriver();
                 }
             }
         });
+    }
+
+    public void zoomToDriver() {
+        if (driverCurrentLatLng != null)
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(driverCurrentLatLng, zoomToDriver));
+    }
+
+    public void zoomToPickUpRoute() {
+        LatLng destination = DecodeTool.getLatLngFromString(trip.getPickUpLocation());
+        LatLng origin = DecodeTool.getLatLngFromString(driverCurrentPosition.getPosition());
+
+        LatLngBounds bounds = new LatLngBounds.Builder()
+                .include(destination)
+                .include(origin).build();
+        Point point = new Point();
+        getWindowManager().getDefaultDisplay().getSize(point);
+
+        map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, point.x, 800, 250));
     }
 
     private void getTripInfo() {
@@ -141,6 +201,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                                 loadTripInfo(trip);
                                 markPickUpAndDropOff(trip);
                             }
+                            tripIsLoaded = true;
                         }
 
                         @Override
@@ -171,6 +232,25 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
 
                     }
                 });
+        }
+
+    private void loadDriverInfo() {
+        FirebaseDatabase.getInstance().getReference().child("Drivers")
+                .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        driver = snapshot.getValue(Driver.class);
+                        if (driver != null) {
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
     }
 
     public void init() {
@@ -189,12 +269,25 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
 
         imgFocusOnMe = findViewById(R.id.img_focusOnMe);
 
+        setUpFocusButton();
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Loading...");
+
         UET = new LatLng(21.038902482537342, 105.78296809797327); //Dai hoc Cong Nghe Lat Lng
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.fragment_maps);
         mapFragment.getMapAsync(this);
+    }
+
+    private void setUpFocusButton() {
+        if (focusOnMe) {
+            imgFocusOnMe.setImageResource(R.drawable.focus);
+        } else {
+            imgFocusOnMe.setImageResource(R.drawable.unfocus);
+        }
     }
 
     @Override
@@ -206,6 +299,8 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
         map.getUiSettings().setMyLocationButtonEnabled(true);
 
         markCurrentLocation();
+
+        waitDataFullLoad();
     }
 
     private void markCurrentLocation() {
@@ -267,7 +362,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                 .position(pickup)
                 .title("Pick-up")
                 .anchor(0.5f, 0.5f)
-                .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(pickUpMarkerName, driverMarkerSize, driverMarkerSize))));
+                .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(pickUpMarkerName, locationMarkerSize, locationMarkerSize))));
 
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(pickup, zoomToDriver));
 
@@ -275,7 +370,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                 .position(dropOff)
                 .title("Drop-off")
                 .anchor(0.5f, 0.5f)
-                .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(desMarkerName, driverMarkerSize, driverMarkerSize))));
+                .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(desMarkerName, locationMarkerSize, locationMarkerSize))));
 
     }
 
@@ -311,6 +406,143 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
         return false;
     }
 
+    private void loadCurrentApiKey() {
+        FirebaseDatabase.getInstance().getReference().child("Current-API-KEY")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        MAPS_API_KEY = snapshot.getValue(String.class);
+                        keyIsLoaded = true;
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+
+    private void waitDataFullLoad() {
+        new Thread() {
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (keyIsLoaded && driverPosIsLoaded && tripIsLoaded) {
+                            Toast.makeText(PickUpActivity.this, "All data loaded!", Toast.LENGTH_SHORT).show();
+                            try {
+                                drawRoute(
+                                        DecodeTool.getLatLngFromString(driverCurrentPosition.getPosition()),
+                                        DecodeTool.getLatLngFromString(trip.getPickUpLocation()),
+                                        DecodeTool.getLatLngFromString(trip.getDropOffLocation())
+                            );
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            waitDataFullLoad();
+                        }
+                    }
+                });
+            }
+        }.start();
+    }
+
+    private void drawRoute(LatLng driverPos, LatLng origin, LatLng destination) throws IOException {
+        direction(driverPos, origin, "pick-up");
+        direction(origin, destination, "drop-off");
+    }
+
+    private void direction(LatLng origin, LatLng destination, String option) throws IOException {
+        String strOrigin = origin.latitude + ", " + origin.longitude;
+        String strDestination = destination.latitude + ", " + destination.longitude;
+
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        String url = Uri.parse("https://maps.googleapis.com/maps/api/directions/json")
+                .buildUpon()
+                .appendQueryParameter("destination", strDestination)
+                .appendQueryParameter("origin", strOrigin)
+                .appendQueryParameter("mode", "driving")
+                .appendQueryParameter("key", MAPS_API_KEY)
+                .toString();
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new com.android.volley.Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                progressDialog.dismiss();
+                try {
+                    String status = response.getString("status");
+                    if (status.equals("OK")) {
+                        JSONArray routes = response.getJSONArray("routes");
+
+                        ArrayList<LatLng> points;
+                        PolylineOptions polylineOptions = null;
+
+                        for (int i=0;i<routes.length();i++){
+                            points = new ArrayList<>();
+                            polylineOptions = new PolylineOptions();
+                            JSONArray legs = routes.getJSONObject(i).getJSONArray("legs");
+
+                            for (int j=0;j<legs.length();j++){
+                                JSONArray steps = legs.getJSONObject(j).getJSONArray("steps");
+
+                                for (int k=0;k<steps.length();k++){
+                                    String polyline = steps.getJSONObject(k).getJSONObject("polyline").getString("points");
+                                    List<LatLng> list = decodePoly(polyline);
+
+                                    for (int l=0;l<list.size();l++){
+                                        LatLng position = new LatLng((list.get(l)).latitude, (list.get(l)).longitude);
+                                        points.add(position);
+                                    }
+                                }
+                            }
+                            polylineOptions.addAll(points);
+                            polylineOptions.width(polyWidth);
+                            polylineOptions.geodesic(true);
+
+                            if (option.equals("pick-up")) {
+                                polylineOptions.color(ContextCompat.getColor(getApplicationContext(), R.color.blue));
+                            } else {
+                                polylineOptions.color(ContextCompat.getColor(getApplicationContext(), R.color.red));
+                            }
+                        }
+
+                        assert polylineOptions != null;
+                        Polyline tempPoly = map.addPolyline(polylineOptions);
+                        LatLngBounds bounds = new LatLngBounds.Builder()
+                                .include(new LatLng(destination.latitude, destination.longitude))
+                                .include(new LatLng(origin.latitude, origin.longitude)).build();
+                        Point point = new Point();
+                        getWindowManager().getDefaultDisplay().getSize(point);
+
+                        if (option.equals("pick-up")) {
+                            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, point.x, 800, 250));
+                            pickupPolyline = tempPoly;
+                        } else {
+                            dropOffPolyLine = tempPoly;
+                        }
+                    }
+                } catch (JSONException e) {
+                    Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
+            }
+        });
+        RetryPolicy retryPolicy = new DefaultRetryPolicy(30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        jsonObjectRequest.setRetryPolicy(retryPolicy);
+        requestQueue.add(jsonObjectRequest);
+    }
+
+    private List<LatLng> decodePoly(String encoded){
+
+        return PolyUtil.decode(encoded);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -319,6 +551,27 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
         if (!(isMyServiceRunning(MyLocationService.class, this))) {
             startServiceFunc();
         }
+        loadCurrentApiKey();
+        loadDriverInfo();
+        getTripInfo();
+        loadDriverPosition();
+    }
+
+    private void loadDriverPosition() {
+        FirebaseDatabase.getInstance().getReference().child("CurrentPosition").child("Driver")
+                .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        driverCurrentPosition = snapshot.getValue(CurrentPosition.class);
+                        driverPosIsLoaded = true;
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
     }
 
     @Override
