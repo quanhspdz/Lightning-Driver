@@ -449,8 +449,8 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     }
 
     private void drawRoute(LatLng driverPos, LatLng origin, LatLng destination) throws IOException {
-        direction(driverPos, origin, "pick-up");
         direction(origin, destination, "drop-off");
+        direction(driverPos, origin, "pick-up");
     }
 
     private void direction(LatLng origin, LatLng destination, String option) throws IOException {
