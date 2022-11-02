@@ -4,13 +4,15 @@ public class CurrentPosition {
     private String driverId;
     private String position;
     private String bearing;
+    private String speed;
     private String vehicleType;
     private String time;
 
-    public CurrentPosition(String driverId, String position, String bearing, String vehicleType, String time) {
+    public CurrentPosition(String driverId, String position, String bearing, String speed, String vehicleType, String time) {
         this.driverId = driverId;
         this.position = position;
         this.bearing = bearing;
+        this.speed = speed;
         this.vehicleType = vehicleType;
         this.time = time;
     }
@@ -62,5 +64,13 @@ public class CurrentPosition {
 
     public void setVehicleType(String vehicleType) {
         this.vehicleType = vehicleType;
+    }
+
+    public String getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(String speed) {
+        this.speed = speed;
     }
 }

@@ -45,6 +45,7 @@ import com.example.lightningdriver.models.Driver;
 import com.example.lightningdriver.models.Trip;
 import com.example.lightningdriver.models.Vehicle;
 import com.example.lightningdriver.tools.Const;
+import com.example.lightningdriver.tools.Converter;
 import com.example.lightningdriver.tools.DecodeTool;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -346,6 +347,7 @@ public class MyLocationService extends Service {
                 Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid(),
                 latLng.toString(),
                 String.valueOf(location.getBearing()),
+                String.valueOf(Converter.fromMPerSToKmPerHour(location.getSpeed())),
                 vehicle.getType(),
                 Calendar.getInstance().getTime().toString()
         );
