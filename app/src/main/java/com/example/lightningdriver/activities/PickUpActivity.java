@@ -200,6 +200,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                             if (trip != null) {
                                 loadTripInfo(trip);
                                 markPickUpAndDropOff(trip);
+                                setVehicleIcon(trip);
                             }
                             tripIsLoaded = true;
                         }
@@ -209,6 +210,14 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
 
                         }
                     });
+        }
+    }
+
+    private void setVehicleIcon(Trip trip) {
+        if (trip.getVehicleType().equals(Const.car)) {
+            markerIconName = taxiMarker;
+        } else {
+            markerIconName = motorMarker;
         }
     }
 
