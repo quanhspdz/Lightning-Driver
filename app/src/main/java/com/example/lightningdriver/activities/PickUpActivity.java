@@ -105,6 +105,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     public static int locationMarkerSize = 120;
     public static int zoomToDriver = 17;
     public static String MAPS_API_KEY;
+    public static String GOONG_API_KEY;
     public static float polyWidth = 14;
 
     MyLocationService mLocationService;
@@ -429,6 +430,19 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
 
                     }
                 });
+
+        FirebaseDatabase.getInstance().getReference().child("GOONG_API_KEY")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        GOONG_API_KEY = snapshot.getValue(String.class);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
     }
 
     private void waitDataFullLoad() {
@@ -466,21 +480,26 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
         String strOrigin = origin.latitude + ", " + origin.longitude;
         String strDestination = destination.latitude + ", " + destination.longitude;
 
+        String vehicleType;
+        if (trip.getVehicleType().equals(Const.car)) {
+            vehicleType = "car";
+        } else {
+            vehicleType = "bike";
+        }
+
         RequestQueue requestQueue = Volley.newRequestQueue(this);
-        String url = Uri.parse("https://maps.googleapis.com/maps/api/directions/json")
+        String url = Uri.parse("https://rsapi.goong.io/Direction")
                 .buildUpon()
-                .appendQueryParameter("destination", strDestination)
                 .appendQueryParameter("origin", strOrigin)
-                .appendQueryParameter("mode", "driving")
-                .appendQueryParameter("key", MAPS_API_KEY)
+                .appendQueryParameter("destination", strDestination)
+                .appendQueryParameter("vehicle", vehicleType)
+                .appendQueryParameter("api_key", GOONG_API_KEY)
                 .toString();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new com.android.volley.Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 progressDialog.dismiss();
                 try {
-                    String status = response.getString("status");
-                    if (status.equals("OK")) {
                         JSONArray routes = response.getJSONArray("routes");
 
                         ArrayList<LatLng> points;
@@ -511,7 +530,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                             if (option.equals("pick-up")) {
                                 polylineOptions.color(ContextCompat.getColor(getApplicationContext(), R.color.blue));
                             } else {
-                                polylineOptions.color(ContextCompat.getColor(getApplicationContext(), R.color.red));
+                         git       polylineOptions.color(ContextCompat.getColor(getApplicationContext(), R.color.red));
                             }
                         }
 
@@ -529,7 +548,6 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                         } else {
                             dropOffPolyLine = tempPoly;
                         }
-                    }
                 } catch (JSONException e) {
                     Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
                     progressDialog.dismiss();
