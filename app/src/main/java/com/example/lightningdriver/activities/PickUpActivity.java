@@ -530,7 +530,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                             if (option.equals("pick-up")) {
                                 polylineOptions.color(ContextCompat.getColor(getApplicationContext(), R.color.blue));
                             } else {
-                         git       polylineOptions.color(ContextCompat.getColor(getApplicationContext(), R.color.red));
+                                polylineOptions.color(ContextCompat.getColor(getApplicationContext(), R.color.red));
                             }
                         }
 
