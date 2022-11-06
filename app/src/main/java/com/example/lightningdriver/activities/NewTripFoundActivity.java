@@ -1,24 +1,18 @@
 package com.example.lightningdriver.activities;
 
-import static java.lang.String.*;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.lightningdriver.R;
 import com.example.lightningdriver.models.Trip;
 import com.example.lightningdriver.tools.Const;
-import com.example.services.MyLocationService;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.example.lightningdriver.services.MyLocationService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;

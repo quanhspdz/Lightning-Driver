@@ -40,7 +40,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/MAPS_API_KEY_STATIC" />
 
-        <service android:name="com.example.services.MyLocationService" />
+        <service android:name=".services.MyLocationService" />
 
         <activity
             android:name=".activities.WorkingActivity"
