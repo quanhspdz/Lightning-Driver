@@ -83,11 +83,12 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     AppCompatButton buttonArrived;
     CircleImageView imgFocusOnMe;
     ImageView imgDriver;
+    RelativeLayout layoutStatus;
 
     public static GoogleMap map;
     public static Marker currentLocationMarker;
     public static boolean isRunning = false;
-    public static boolean bottomLayoutIsVisible = false;
+    public static boolean bottomLayoutIsVisible = true;
     public static boolean focusOnMe = false;
 
     private static final int ACCESS_FINE_LOCATION_REQUEST_CODE = 123;
@@ -140,7 +141,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     }
 
     private void listener() {
-        textStatus.setOnClickListener(new View.OnClickListener() {
+        layoutStatus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (bottomLayoutIsVisible) {
@@ -152,6 +153,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                 }
             }
         });
+
 
         imgFocusOnMe.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -336,6 +338,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
 
         imgFocusOnMe = findViewById(R.id.img_focusOnMe);
         imgDriver = findViewById(R.id.img_profile);
+        layoutStatus = findViewById(R.id.layout_statusUpdate);
 
         setUpFocusButton();
 
