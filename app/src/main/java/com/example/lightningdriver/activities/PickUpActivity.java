@@ -22,6 +22,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,6 +64,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.maps.android.PolyUtil;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -80,6 +82,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     RelativeLayout layoutCall, layoutChat, layoutTripInfo, layoutBottom;
     AppCompatButton buttonArrived;
     CircleImageView imgFocusOnMe;
+    ImageView imgDriver;
 
     public static GoogleMap map;
     public static Marker currentLocationMarker;
@@ -245,7 +248,8 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         driver = snapshot.getValue(Driver.class);
                         if (driver != null) {
-
+                            Picasso.get().load(driver.getDriverImageUrl()).placeholder(R.drawable.user_blue)
+                                    .centerCrop().resize(1000, 1000).into(imgDriver);
                         }
                     }
 
@@ -271,6 +275,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
         buttonArrived = findViewById(R.id.button_arrived);
 
         imgFocusOnMe = findViewById(R.id.img_focusOnMe);
+        imgDriver = findViewById(R.id.img_profile);
 
         setUpFocusButton();
 
@@ -382,9 +387,9 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
         mServiceIntent = new Intent(this, mLocationService.getClass());
         if (!isMyServiceRunning(mLocationService.getClass(), this)) {
             startService(mServiceIntent);
-            Toast.makeText(this, "Service start successfully", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "Service start successfully", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Service is already running", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "Service is already running", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -445,7 +450,6 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                     @Override
                     public void run() {
                         if (keyIsLoaded && driverPosIsLoaded && tripIsLoaded) {
-                            Toast.makeText(PickUpActivity.this, "All data loaded!", Toast.LENGTH_SHORT).show();
                             try {
                                 drawRoute(
                                         DecodeTool.getLatLngFromString(driverCurrentPosition.getPosition()),

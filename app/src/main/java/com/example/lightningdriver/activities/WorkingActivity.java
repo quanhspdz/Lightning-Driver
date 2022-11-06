@@ -288,9 +288,9 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
         mServiceIntent = new Intent(this, mLocationService.getClass());
         if (!isMyServiceRunning(mLocationService.getClass(), this)) {
             startService(mServiceIntent);
-            Toast.makeText(this, "Service start successfully", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Service start successfully", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Service is already running", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Service is already running", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -299,9 +299,9 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
         mServiceIntent = new Intent(this, mLocationService.getClass());
         if (isMyServiceRunning(mLocationService.getClass(), this)) {
             stopService(mServiceIntent);
-            Toast.makeText(this, "Service stopped!!", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Service stopped!!", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Service is already stopped!!", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Service is already stopped!!", Toast.LENGTH_SHORT).show();
         }
     }
 
