@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.example.lightningdriver.R;
 import com.example.lightningdriver.models.Trip;
@@ -64,11 +65,14 @@ public class MainActivity extends AppCompatActivity {
                                     Trip trip = dataSnapshot.getValue(Trip.class);
                                     if (trip != null) {
                                         if (trip.getDriverId() != null) {
-                                            if (trip.getDriverId().equals(driverId) && trip.getStatus().equals(Const.waitingToPickUp)
-                                                && !pickUpActivityIsStart) {
+                                            if (trip.getDriverId().equals(driverId)
+                                                    && !trip.getStatus().equals(Const.searching)
+                                                    && !trip.getStatus().equals(Const.waitingForAccept)
+                                                    && !trip.getStatus().equals(Const.canceled)
+                                                    && !trip.getStatus().equals(Const.success)
+                                                    && !PickUpActivity.isRunning) {
                                                 Intent intent = new Intent(MainActivity.this, PickUpActivity.class);
                                                 intent.putExtra("tripId", trip.getId());
-                                                pickUpActivityIsStart = true;
                                                 startActivity(intent);
                                                 progressDialog.dismiss();
                                             }

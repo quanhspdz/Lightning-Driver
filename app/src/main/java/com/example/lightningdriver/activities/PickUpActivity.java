@@ -123,6 +123,11 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
 
     ProgressDialog progressDialog;
 
+    boolean arrivedToPickUpPoint = false;
+    boolean passengerIsReady = false;
+    boolean arrivedToDropOff = false;
+    boolean firstTimeLoadTrip = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -164,6 +169,60 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                 }
             }
         });
+
+        buttonArrived.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (trip != null) {
+                    if (!arrivedToPickUpPoint) {
+                        updateStatus(Const.driverArrivedPickUp);
+                    } else if (!passengerIsReady) {
+                        updateStatus(Const.onGoing);
+                    } else if (!arrivedToDropOff) {
+                        updateStatus(Const.arrivedDropOff);
+                    }
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "Trip is null", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void updateStatus(String status) {
+        if (!status.equals(trip.getStatus())) {
+            updateTripStatus(status);
+        }
+
+        if (status.equals(Const.driverArrivedPickUp)) {
+            arrivedToPickUpPoint = true;
+            if (trip.getVehicleType().equals(Const.car)) {
+                textStatus.setText("Waiting for passenger to get in");
+                buttonArrived.setText("Passenger got in");
+            } else {
+                textStatus.setText("Waiting for passenger to get on");
+                buttonArrived.setText("Passenger got on");
+            }
+        } else if (status.equals(Const.onGoing)) {
+            arrivedToPickUpPoint = true;
+            passengerIsReady = true;
+            textStatus.setText("Going to drop-off point");
+            buttonArrived.setText("Arrived");
+        }
+        else if (status.equals(Const.arrivedDropOff)) {
+            arrivedToPickUpPoint = true;
+            passengerIsReady = true;
+            arrivedToDropOff = true;
+            textStatus.setText("Waiting for payment");
+            buttonArrived.setText("Done");
+        }
+    }
+
+    private void updateTripStatus(String status) {
+        trip.setStatus(status);
+        FirebaseDatabase.getInstance().getReference().child("Trips")
+                .child(tripId)
+                .setValue(trip);
     }
 
     public void zoomToDriver() {
@@ -198,6 +257,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                                 loadTripInfo(trip);
                                 markPickUpAndDropOff(trip);
                                 setVehicleIcon(trip);
+                                updateStatus(trip.getStatus());
                             }
                             tripIsLoaded = true;
                         }
