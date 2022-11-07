@@ -256,9 +256,6 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             trip = snapshot.getValue(Trip.class);
                             if (trip != null) {
-                                loadTripInfo(trip);
-                                markPickUpAndDropOff(trip);
-                                setVehicleIcon(trip);
                                 updateStatus(trip.getStatus());
                             }
                             tripIsLoaded = true;
@@ -519,6 +516,9 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                                         DecodeTool.getLatLngFromString(trip.getPickUpLocation()),
                                         DecodeTool.getLatLngFromString(trip.getDropOffLocation())
                             );
+                                loadTripInfo(trip);
+                                markPickUpAndDropOff(trip);
+                                setVehicleIcon(trip);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }

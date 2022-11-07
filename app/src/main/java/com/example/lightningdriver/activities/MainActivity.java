@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
                                         if (trip.getDriverId() != null) {
                                             if (trip.getDriverId().equals(driverId)
                                                     && !trip.getStatus().equals(Const.searching)
+                                                    && !trip.getStatus().equals(Const.driverFound)
                                                     && !trip.getStatus().equals(Const.waitingForAccept)
                                                     && !trip.getStatus().equals(Const.canceled)
                                                     && !trip.getStatus().equals(Const.success)
