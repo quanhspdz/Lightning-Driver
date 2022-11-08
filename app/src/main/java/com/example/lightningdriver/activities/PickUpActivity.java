@@ -128,6 +128,8 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     boolean passengerIsReady = false;
     boolean arrivedToDropOff = false;
     boolean firstTimeLoadTrip = true;
+    boolean pickUpIsDrawn = false, dropOffIsDrawn = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,7 +163,11 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                 if (focusOnMe) {
                     focusOnMe = false;
                     if (tripIsLoaded && driverPosIsLoaded) {
-                        zoomToPickUpRoute();
+                        if (!dropOffIsDrawn) {
+                            zoomToPickUpRoute();
+                        } else {
+                            zoomToDropOff();
+                        }
                     }
                     imgFocusOnMe.setImageResource(R.drawable.unfocus);
                 } else {
@@ -191,6 +197,17 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
         });
     }
 
+    public void zoomToDropOff() {
+        LatLngBounds bounds = new LatLngBounds.Builder()
+                .include(DecodeTool.getLatLngFromString(trip.getDropOffLocation()))
+                .include(DecodeTool.getLatLngFromString(trip.getPickUpLocation())).build();
+        Point point = new Point();
+        getWindowManager().getDefaultDisplay().getSize(point);
+
+        map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, point.x, 800, 250));
+    }
+
+
     private void updateStatus(String status) {
         if (!status.equals(trip.getStatus())) {
             updateTripStatus(status);
@@ -210,6 +227,20 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
             passengerIsReady = true;
             textStatus.setText("Going to drop-off point");
             buttonArrived.setText("Arrived");
+
+            if (!dropOffIsDrawn && pickUpIsDrawn) {
+                pickupPolyline.remove();
+                try {
+                    direction(
+                            DecodeTool.getLatLngFromString(trip.getPickUpLocation()),
+                            DecodeTool.getLatLngFromString(trip.getDropOffLocation()),
+                            "drop-off"
+                    );
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                dropOffIsDrawn = true;
+            }
         }
         else if (status.equals(Const.arrivedDropOff)) {
             arrivedToPickUpPoint = true;
@@ -217,6 +248,20 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
             arrivedToDropOff = true;
             textStatus.setText("Waiting for payment");
             buttonArrived.setText("Done");
+
+            if (!dropOffIsDrawn && pickUpIsDrawn) {
+                pickupPolyline.remove();
+                try {
+                    direction(
+                            DecodeTool.getLatLngFromString(trip.getPickUpLocation()),
+                            DecodeTool.getLatLngFromString(trip.getDropOffLocation()),
+                            "drop-off"
+                    );
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                dropOffIsDrawn = true;
+            }
         }
     }
 
@@ -532,8 +577,11 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     }
 
     private void drawRoute(LatLng driverPos, LatLng origin, LatLng destination) throws IOException {
-        direction(origin, destination, "drop-off");
-        direction(driverPos, origin, "pick-up");
+        if (trip.getStatus().equals(Const.waitingToPickUp) || trip.getStatus().equals(Const.driverArrivedPickUp)) {
+            direction(driverPos, origin, "pick-up");
+        } else if (trip.getStatus().equals(Const.onGoing) || trip.getStatus().equals(Const.arrivedDropOff)) {
+            direction(origin, destination, "drop-off");
+        }
     }
 
     private void direction(LatLng origin, LatLng destination, String option) throws IOException {
@@ -565,19 +613,19 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                         ArrayList<LatLng> points;
                         PolylineOptions polylineOptions = null;
 
-                        for (int i=0;i<routes.length();i++){
+                        for (int i=0;i<routes.length();i++) {
                             points = new ArrayList<>();
                             polylineOptions = new PolylineOptions();
                             JSONArray legs = routes.getJSONObject(i).getJSONArray("legs");
 
-                            for (int j=0;j<legs.length();j++){
+                            for (int j = 0; j < legs.length(); j++) {
                                 JSONArray steps = legs.getJSONObject(j).getJSONArray("steps");
 
-                                for (int k=0;k<steps.length();k++){
+                                for (int k = 0; k < steps.length(); k++) {
                                     String polyline = steps.getJSONObject(k).getJSONObject("polyline").getString("points");
                                     List<LatLng> list = decodePoly(polyline);
 
-                                    for (int l=0;l<list.size();l++){
+                                    for (int l = 0; l < list.size(); l++) {
                                         LatLng position = new LatLng((list.get(l)).latitude, (list.get(l)).longitude);
                                         points.add(position);
                                     }
@@ -586,14 +634,8 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                             polylineOptions.addAll(points);
                             polylineOptions.width(polyWidth);
                             polylineOptions.geodesic(true);
-
-                            if (option.equals("pick-up")) {
-                                polylineOptions.color(ContextCompat.getColor(getApplicationContext(), R.color.blue));
-                            } else {
-                                polylineOptions.color(ContextCompat.getColor(getApplicationContext(), R.color.red));
-                            }
+                            polylineOptions.color(ContextCompat.getColor(getApplicationContext(), R.color.blue));
                         }
-
                         assert polylineOptions != null;
                         Polyline tempPoly = map.addPolyline(polylineOptions);
                         LatLngBounds bounds = new LatLngBounds.Builder()
@@ -603,11 +645,13 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                         getWindowManager().getDefaultDisplay().getSize(point);
 
                         if (option.equals("pick-up")) {
-                            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, point.x, 800, 250));
                             pickupPolyline = tempPoly;
+                            pickUpIsDrawn = true;
                         } else {
                             dropOffPolyLine = tempPoly;
+                            dropOffIsDrawn = true;
                         }
+                        map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, point.x, 800, 250));
                 } catch (JSONException e) {
                     Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
                     progressDialog.dismiss();
