@@ -21,6 +21,7 @@ import android.graphics.Point;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -131,6 +132,9 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     boolean firstTimeLoadTrip = true;
     boolean pickUpIsDrawn = false, dropOffIsDrawn = false;
 
+    private final int CALL_REQUEST_CODE = 123;
+    private final int SMS_REQUEST_CODE = 234;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -199,6 +203,46 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                 }
                 else {
                     Toast.makeText(getApplicationContext(), "Trip is null", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        layoutCall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (passenger != null) {
+                    if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.CALL_PHONE)
+                            != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(PickUpActivity.this,
+                                new String[]{Manifest.permission.CALL_PHONE},
+                                CALL_REQUEST_CODE);
+                    } else {
+                        Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + passenger.getPhoneNumber()));
+                        startActivity(intent);
+                    }
+                } else {
+                    Toast.makeText(getApplicationContext(), "Passenger is null!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        layoutChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (passenger != null) {
+                    if (ContextCompat.checkSelfPermission(getApplicationContext(),android.Manifest.permission.SEND_SMS)
+                            != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(PickUpActivity.this,
+                                new String[]{Manifest.permission.SEND_SMS},
+                                SMS_REQUEST_CODE);
+                    } else {
+                        String number = passenger.getPhoneNumber();
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", number,null));
+                        //intent.putExtra("sms_body", "Hehe");
+                        startActivity(intent);
+                    }
+                } else {
+                    Toast.makeText(PickUpActivity.this, "passenger is null!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
