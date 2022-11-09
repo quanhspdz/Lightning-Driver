@@ -241,6 +241,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                 }
                 dropOffIsDrawn = true;
             }
+            textPickUp.setText(trip.getDropOffName());
         }
         else if (status.equals(Const.arrivedDropOff)) {
             arrivedToPickUpPoint = true;
@@ -262,6 +263,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                 }
                 dropOffIsDrawn = true;
             }
+            textPickUp.setText(trip.getDropOffName());
         }
     }
 
@@ -323,7 +325,9 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     }
 
     private void loadTripInfo(Trip trip) {
-        textPickUp.setText(trip.getPickUpName());
+        if (trip.getStatus().equals(Const.driverArrivedPickUp) || trip.getStatus().equals(Const.waitingToPickUp)) {
+            textPickUp.setText(trip.getPickUpName());
+        }
         textMoney.setText(trip.getCost());
 
         FirebaseDatabase.getInstance().getReference().child("Passengers")
