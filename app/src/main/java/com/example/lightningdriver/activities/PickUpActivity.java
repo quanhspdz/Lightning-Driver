@@ -72,6 +72,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 
@@ -275,6 +276,9 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
 
     private void updateTripStatus(String status) {
         trip.setStatus(status);
+        if (status.equals(Const.success)) {
+            trip.setEndTime(Calendar.getInstance().getTime().toString());
+        }
         FirebaseDatabase.getInstance().getReference().child("Trips")
                 .child(tripId)
                 .setValue(trip);
