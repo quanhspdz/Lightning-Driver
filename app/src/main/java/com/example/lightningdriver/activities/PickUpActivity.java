@@ -188,6 +188,12 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                         updateStatus(Const.onGoing);
                     } else if (!arrivedToDropOff) {
                         updateStatus(Const.arrivedDropOff);
+                    } else {
+                        updateStatus(Const.success);
+                        Intent intent = new Intent(PickUpActivity.this, WorkingActivity.class);
+                        Toast.makeText(PickUpActivity.this, "Done!", Toast.LENGTH_SHORT).show();
+                        startActivity(intent);
+                        finish();
                     }
                 }
                 else {
