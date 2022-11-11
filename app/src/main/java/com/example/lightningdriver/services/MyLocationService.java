@@ -276,10 +276,19 @@ public class MyLocationService extends Service {
                             Trip trip = dataSnapshot.getValue(Trip.class);
                             if (trip != null && isFindingTrip) {
                                 if (trip.getStatus().equals(Const.searching) && trip.getVehicleType().equals(vehicle.getType())
-                                    && !rejectedTrips.containsKey(trip.getId())) {
+                                        && !rejectedTrips.containsKey(trip.getId())) {
                                     listTrips.add(trip);
                                 }
-                            }
+                                if (trip.getDriverId() != null)
+                                    if (trip.getDriverId().equals(
+                                            Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
+                                            && !trip.getStatus().equals(Const.success)
+                                            && !trip.getStatus().equals(Const.searching)
+                                    ) {
+                                        isFindingTrip = false;
+                                        return;
+                                    }
+                                }
                         }
 
                         if (listTrips.size() > 0 && isFindingTrip && !PickUpActivity.isRunning) {

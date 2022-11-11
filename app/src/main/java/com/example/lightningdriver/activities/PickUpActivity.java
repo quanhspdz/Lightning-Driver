@@ -197,6 +197,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                         updateStatus(Const.success);
                         Intent intent = new Intent(PickUpActivity.this, WorkingActivity.class);
                         Toast.makeText(PickUpActivity.this, "Done!", Toast.LENGTH_SHORT).show();
+                        MyLocationService.isFindingTrip = true;
                         startActivity(intent);
                         finish();
                     }
@@ -775,6 +776,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     public void onBackPressed() {
         super.onBackPressed();
         finish();
+        isRunning = false;
         MainActivity.pickUpActivityIsStart = false;
     }
 }
