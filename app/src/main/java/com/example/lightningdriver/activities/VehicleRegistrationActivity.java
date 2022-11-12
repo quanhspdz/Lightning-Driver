@@ -57,6 +57,8 @@ public class VehicleRegistrationActivity extends AppCompatActivity {
     String vehicleType;
     ProgressDialog progressDialog;
 
+    final int PICK_IMAGE_REQUEST = 123;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,13 +72,13 @@ public class VehicleRegistrationActivity extends AppCompatActivity {
         imageVehicle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CropImage.activity().start(VehicleRegistrationActivity.this);
+                pickImage();
             }
         });
         textUploadImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CropImage.activity().start(VehicleRegistrationActivity.this);
+                pickImage();
             }
         });
 
@@ -108,6 +110,12 @@ public class VehicleRegistrationActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void pickImage() {
+        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+        photoPickerIntent.setType("image/*");
+        startActivityForResult(photoPickerIntent, PICK_IMAGE_REQUEST);
     }
 
     private boolean checkInputData() {
@@ -260,10 +268,8 @@ public class VehicleRegistrationActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
-            CropImage.ActivityResult result = CropImage.getActivityResult(data);
-            assert result != null;
-            imageUri = result.getUri();
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+            imageUri = data.getData();
             imageVehicle.setImageURI(imageUri);
         } else {
             Toast.makeText(this, "Error, please try again!", Toast.LENGTH_SHORT).show();

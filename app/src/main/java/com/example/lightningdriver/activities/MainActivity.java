@@ -14,6 +14,7 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.example.lightningdriver.R;
+import com.example.lightningdriver.models.Driver;
 import com.example.lightningdriver.models.Trip;
 import com.example.lightningdriver.tools.Const;
 import com.google.firebase.auth.FirebaseAuth;
@@ -21,12 +22,16 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
 import java.util.Objects;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
 
     FrameLayout btnWorking, buttonCurrentOrder;
+    CircleImageView imageProfile;
 
     ProgressDialog progressDialog;
 
@@ -39,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
         setStatusBarColor();
         init();
+        getDriverInfo();
         listener();
 
     }
@@ -94,9 +100,42 @@ public class MainActivity extends AppCompatActivity {
     private void init() {
         btnWorking = findViewById(R.id.buttonWorking);
         buttonCurrentOrder = findViewById(R.id.buttonCurrentOrder);
+        imageProfile = findViewById(R.id.img_profile);
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Loading...");
+    }
+
+    private void getDriverInfo() {
+        FirebaseDatabase.getInstance().getReference()
+                .child("Drivers")
+                .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        Driver driver = snapshot.getValue(Driver.class);
+                        if (driver != null) {
+                            Picasso.get().load(driver.getDriverImageUrl())
+                                    .resize(1000, 1000)
+                                            .centerCrop().into(imageProfile);
+
+                            checkVehicleRegistration(driver);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+
+    private void checkVehicleRegistration(Driver driver) {
+        if (driver.getVehicleId() == null) {
+            Intent intent = new Intent(MainActivity.this, VehicleRegistrationActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     private void setStatusBarColor() {
