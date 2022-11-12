@@ -95,6 +95,18 @@ public class MainActivity extends AppCompatActivity {
                         });
             }
         });
+
+        imageProfile.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                Intent intent = new Intent(MainActivity.this, WelcomeActivity.class);
+                startActivity(intent);
+                Toast.makeText(MainActivity.this, "Sign out", Toast.LENGTH_SHORT).show();
+                finish();
+                return false;
+            }
+        });
     }
 
     private void init() {
