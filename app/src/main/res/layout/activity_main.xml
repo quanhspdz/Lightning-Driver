@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/ghost_white"
     tools:context=".activities.MainActivity">
 
     <androidx.appcompat.widget.Toolbar
@@ -50,11 +51,13 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="240dp"
         android:layout_marginHorizontal="30dp"
         android:layout_marginTop="100dp"
         android:layout_below="@id/toolBar"
+        android:background="@drawable/background_white"
         android:orientation="vertical"
+        android:padding="20dp"
         android:weightSum="2">
 
         <LinearLayout
@@ -76,7 +79,7 @@
                     <FrameLayout
                         android:layout_width="70dp"
                         android:layout_height="70dp"
-                        android:id="@+id/buttonMotor"
+                        android:id="@+id/buttonWorking"
                         android:background="@drawable/menu_background"
                         android:layout_centerHorizontal="true">
 
@@ -84,7 +87,7 @@
                             android:layout_width="65dp"
                             android:layout_height="65dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/shipper" />
+                            android:src="@drawable/search_location" />
 
                     </FrameLayout>
 
@@ -92,7 +95,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
-                        android:text="Motorbike"
+                        android:text="Working"
                         android:layout_marginBottom="10dp"
                         android:layout_centerHorizontal="true"/>
 
@@ -113,7 +116,7 @@
                     <FrameLayout
                         android:layout_width="70dp"
                         android:layout_height="70dp"
-                        android:id="@+id/buttonCar"
+                        android:id="@+id/buttonCurrentOrder"
                         android:background="@drawable/menu_background"
                         android:layout_centerHorizontal="true">
 
@@ -121,7 +124,7 @@
                             android:layout_width="65dp"
                             android:layout_height="65dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/car" />
+                            android:src="@drawable/current_order" />
 
                     </FrameLayout>
 
@@ -129,7 +132,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
-                        android:text="Car"
+                        android:text="Current Order"
                         android:layout_marginBottom="10dp"
                         android:layout_centerHorizontal="true"/>
 
@@ -158,7 +161,7 @@
                             android:layout_width="65dp"
                             android:layout_height="65dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/refresh" />
+                            android:src="@drawable/history_new" />
 
                     </FrameLayout>
 
@@ -194,7 +197,7 @@
                     <FrameLayout
                         android:layout_width="70dp"
                         android:layout_height="70dp"
-                        android:id="@+id/buttonCurrentOrder"
+                        android:id="@+id/buttonInCome"
                         android:background="@drawable/menu_background"
                         android:layout_centerHorizontal="true">
 
@@ -202,7 +205,7 @@
                             android:layout_width="65dp"
                             android:layout_height="65dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/current_order" />
+                            android:src="@drawable/income" />
 
                     </FrameLayout>
 
@@ -210,7 +213,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
-                        android:text="Current order"
+                        android:text="Income"
                         android:layout_marginBottom="10dp"
                         android:layout_centerHorizontal="true"/>
 
@@ -231,7 +234,7 @@
                     <FrameLayout
                         android:layout_width="70dp"
                         android:layout_height="70dp"
-                        android:id="@+id/buttonWorking"
+                        android:id="@+id/buttonVehicleInfo"
                         android:background="@drawable/menu_background"
                         android:layout_centerHorizontal="true">
 
@@ -239,7 +242,7 @@
                             android:layout_width="65dp"
                             android:layout_height="65dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/locations" />
+                            android:src="@drawable/vehicle_info" />
 
                     </FrameLayout>
 
@@ -247,7 +250,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
-                        android:text="Working"
+                        android:text="Vehicle"
                         android:layout_marginBottom="10dp"
                         android:layout_centerHorizontal="true"/>
 
@@ -276,7 +279,7 @@
                             android:layout_width="65dp"
                             android:layout_height="65dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/settings" />
+                            android:src="@drawable/setting" />
 
                     </FrameLayout>
 
