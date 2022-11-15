@@ -380,7 +380,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     }
 
     private void loadTripInfo(Trip trip) {
-        if (trip.getStatus().equals(Const.driverArrivedPickUp) || trip.getStatus().equals(Const.waitingToPickUp)) {
+        if (trip.getStatus().equals(Const.driverArrivedPickUp) || trip.getStatus().equals(Const.waitingPickUp)) {
             textPickUp.setText(trip.getPickUpName());
         }
         textMoney.setText(trip.getCost());
@@ -636,7 +636,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     }
 
     private void drawRoute(LatLng driverPos, LatLng origin, LatLng destination) throws IOException {
-        if (trip.getStatus().equals(Const.waitingToPickUp) || trip.getStatus().equals(Const.driverArrivedPickUp)) {
+        if (trip.getStatus().equals(Const.waitingPickUp) || trip.getStatus().equals(Const.driverArrivedPickUp)) {
             direction(driverPos, origin, "pick-up");
         } else if (trip.getStatus().equals(Const.onGoing) || trip.getStatus().equals(Const.arrivedDropOff)) {
             direction(origin, destination, "drop-off");

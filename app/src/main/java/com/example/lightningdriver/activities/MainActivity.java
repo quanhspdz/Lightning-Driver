@@ -77,6 +77,8 @@ public class MainActivity extends AppCompatActivity {
                                                     && !trip.getStatus().equals(Const.waitingForAccept)
                                                     && !trip.getStatus().equals(Const.canceled)
                                                     && !trip.getStatus().equals(Const.success)
+                                                    && !trip.getStatus().equals(Const.cancelByPassenger)
+                                                    && !trip.getStatus().equals(Const.cancelByDriver)
                                                     && !PickUpActivity.isRunning) {
                                                 Intent intent = new Intent(MainActivity.this, PickUpActivity.class);
                                                 intent.putExtra("tripId", trip.getId());
