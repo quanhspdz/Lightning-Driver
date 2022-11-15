@@ -136,6 +136,8 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     private final int CALL_REQUEST_CODE = 123;
     private final int SMS_REQUEST_CODE = 234;
 
+    boolean movedToWorking = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,6 +147,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
         init();
         progressDialog.show();
         getTripInfo();
+        getTripStatusUpdate();
         listener();
     }
 
@@ -269,11 +272,18 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
-                            Toast.makeText(PickUpActivity.this, "Your trip has been canceled!", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(PickUpActivity.this, WorkingActivity.class);
-                            MyLocationService.rejectedTrips.put(trip.getId(), trip);
-                            startActivity(intent);
-                            finish();
+                            if (!movedToWorking) {
+                                if (!WorkingActivity.isRunning) {
+                                    Intent intent = new Intent(PickUpActivity.this, WorkingActivity.class);
+                                    Toast.makeText(PickUpActivity.this, "Trip has been canceled!", Toast.LENGTH_SHORT).show();
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                                    startActivity(intent);
+                                }
+                                MyLocationService.isFindingTrip = true;
+                                MyLocationService.rejectedTrips.put(trip.getId(), trip);
+                                finish();
+                                movedToWorking = true;
+                            }
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -283,6 +293,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                         }
                     });
         }
+
     }
 
     public void zoomToDropOff() {
@@ -365,7 +376,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                 .setValue(trip);
     }
 
-    private void getTripStatusUpdate(String tripId) {
+    private void getTripStatusUpdate() {
         FirebaseDatabase.getInstance().getReference()
                 .child("Trips")
                 .child(tripId)
@@ -374,9 +385,11 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         Trip trip = snapshot.getValue(Trip.class);
                         if (trip != null) {
-                            if (trip.getStatus().equals(Const.cancelByPassenger)) {
+                            if (trip.getStatus().equals(Const.cancelByPassenger) && !movedToWorking && !WorkingActivity.isRunning) {
                                 Intent intent = new Intent(PickUpActivity.this, WorkingActivity.class);
-                                Toast.makeText(PickUpActivity.this, "Passenger has canceled this trip!", Toast.LENGTH_SHORT).show();
+                                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                                Toast.makeText(PickUpActivity.this, "Trip has been cancel by passenger!", Toast.LENGTH_SHORT).show();
+                                movedToWorking = true;
                                 MyLocationService.isFindingTrip = true;
                                 startActivity(intent);
                                 finish();
@@ -421,7 +434,6 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                             trip = snapshot.getValue(Trip.class);
                             if (trip != null) {
                                 updateStatus(trip.getStatus());
-                                getTripStatusUpdate(trip.getId());
                             }
                             tripIsLoaded = true;
                         }
