@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.hardware.lights.LightsManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
@@ -66,6 +67,7 @@ import com.google.maps.android.SphericalUtil;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -284,6 +286,8 @@ public class MyLocationService extends Service {
                                             Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
                                             && !trip.getStatus().equals(Const.success)
                                             && !trip.getStatus().equals(Const.searching)
+                                            && !trip.getStatus().equals(Const.cancelByPassenger)
+                                            && !trip.getStatus().equals(Const.cancelByDriver)
                                     ) {
                                         isFindingTrip = false;
                                         return;

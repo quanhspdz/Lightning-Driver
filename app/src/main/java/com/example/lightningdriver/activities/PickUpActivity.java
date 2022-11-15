@@ -58,6 +58,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -82,7 +83,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallback {
     TextView textPassengerName, textPickUp, textMoney, textPaymentMethod, textStatus;
     RelativeLayout layoutCall, layoutChat, layoutTripInfo, layoutBottom;
-    AppCompatButton buttonArrived;
+    AppCompatButton buttonArrived, buttonCancel;
     CircleImageView imgFocusOnMe;
     ImageView imgDriver;
     RelativeLayout layoutStatus;
@@ -247,6 +248,41 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                 }
             }
         });
+
+        buttonCancel.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                cancelTrip();
+
+                return false;
+            }
+        });
+    }
+
+    private void cancelTrip() {
+        if (trip != null) {
+            trip.setStatus(Const.cancelByDriver);
+            FirebaseDatabase.getInstance().getReference()
+                    .child("Trips")
+                    .child(trip.getId())
+                    .setValue(trip)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Toast.makeText(PickUpActivity.this, "Your trip has been canceled!", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(PickUpActivity.this, WorkingActivity.class);
+                            MyLocationService.rejectedTrips.put(trip.getId(), trip);
+                            startActivity(intent);
+                            finish();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(PickUpActivity.this, "Can not cancel your trip, try again!", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
     }
 
     public void zoomToDropOff() {
@@ -329,6 +365,32 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                 .setValue(trip);
     }
 
+    private void getTripStatusUpdate(String tripId) {
+        FirebaseDatabase.getInstance().getReference()
+                .child("Trips")
+                .child(tripId)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        Trip trip = snapshot.getValue(Trip.class);
+                        if (trip != null) {
+                            if (trip.getStatus().equals(Const.cancelByPassenger)) {
+                                Intent intent = new Intent(PickUpActivity.this, WorkingActivity.class);
+                                Toast.makeText(PickUpActivity.this, "Passenger has canceled this trip!", Toast.LENGTH_SHORT).show();
+                                MyLocationService.isFindingTrip = true;
+                                startActivity(intent);
+                                finish();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+
     public void zoomToDriver() {
         if (driverCurrentLatLng != null)
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(driverCurrentLatLng, zoomToDriver));
@@ -359,6 +421,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                             trip = snapshot.getValue(Trip.class);
                             if (trip != null) {
                                 updateStatus(trip.getStatus());
+                                getTripStatusUpdate(trip.getId());
                             }
                             tripIsLoaded = true;
                         }
@@ -440,6 +503,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
         imgFocusOnMe = findViewById(R.id.img_focusOnMe);
         imgDriver = findViewById(R.id.img_profile);
         layoutStatus = findViewById(R.id.layout_statusUpdate);
+        buttonCancel = findViewById(R.id.buttonCancel);
 
         setUpFocusButton();
 
