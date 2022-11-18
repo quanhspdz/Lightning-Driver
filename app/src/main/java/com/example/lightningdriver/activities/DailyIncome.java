@@ -12,6 +12,8 @@ import com.example.lightningdriver.R;
 import com.example.lightningdriver.adapters.DailyIncomeAdapter;
 import com.example.lightningdriver.models.Trip;
 import com.example.lightningdriver.tools.Calculator;
+import com.example.lightningdriver.tools.Const;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -50,13 +52,15 @@ public class DailyIncome extends AppCompatActivity {
                         for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                             Trip trip = dataSnapshot.getValue(Trip.class);
                             if (trip != null) {
-                                String time = Calculator.getShortTime(trip.getCreateTime());
-                                if (dailyOrderMap.containsKey(time)) {
-                                    Objects.requireNonNull(dailyOrderMap.get(time)).add(trip);
-                                } else {
-                                    dailyOrderMap.put(time, new ArrayList<>());
-                                    Objects.requireNonNull(dailyOrderMap.get(time)).add(trip);
-                                    listDays.add(time);
+                                if (checkTripInfo(trip)) {
+                                    String time = Calculator.getShortTime(trip.getCreateTime());
+                                    if (dailyOrderMap.containsKey(time)) {
+                                        Objects.requireNonNull(dailyOrderMap.get(time)).add(trip);
+                                    } else {
+                                        dailyOrderMap.put(time, new ArrayList<>());
+                                        Objects.requireNonNull(dailyOrderMap.get(time)).add(trip);
+                                        listDays.add(time);
+                                    }
                                 }
                             }
                         }
@@ -68,6 +72,14 @@ public class DailyIncome extends AppCompatActivity {
 
                     }
                 });
+    }
+
+    private boolean checkTripInfo(Trip trip) {
+        if (trip.getDriverId() == null) {
+            return false;
+        } else if (!trip.getDriverId().equals(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())) {
+            return false;
+        } else return trip.getStatus().equals(Const.success);
     }
 
     private void init() {

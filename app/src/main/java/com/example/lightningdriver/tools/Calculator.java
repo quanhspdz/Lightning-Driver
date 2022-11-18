@@ -1,21 +1,29 @@
 package com.example.lightningdriver.tools;
 
+import android.content.Context;
+import android.widget.Toast;
+
 import com.example.lightningdriver.models.Trip;
 
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
 public class Calculator {
-    public static String calculateTotalMoney(List<Trip> listTrips) {
+    public static String calculateTotalMoney(List<Trip> listTrips, Context context) {
         double totalMoney = 0;
         for (int i = 0; i < listTrips.size(); i++) {
             Trip trip = listTrips.get(i);
-            String tempStr = trip.getCost().substring(0, trip.getCost().indexOf(" ") - 1);
-            tempStr = tempStr.replaceAll(",", "");
+            String tempStr = trip.getCost().substring(0, trip.getCost().indexOf("₫") - 1);
+            tempStr = tempStr.replaceAll("\\.", "");
+            tempStr = tempStr.replaceAll(",", ".");
+            tempStr = tempStr.trim();
             double money = Double.parseDouble(tempStr);
             totalMoney += money;
         }
 
-        return String.valueOf(totalMoney);
+        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+        return nf.format(totalMoney);
     }
 
     public static String getShortTime(String fullTime) {

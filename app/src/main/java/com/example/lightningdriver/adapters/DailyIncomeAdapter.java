@@ -13,6 +13,10 @@ import com.example.lightningdriver.R;
 import com.example.lightningdriver.models.Trip;
 import com.example.lightningdriver.tools.Calculator;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -39,12 +43,25 @@ public class DailyIncomeAdapter extends RecyclerView.Adapter<DailyIncomeAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         List<Trip> listTrips = listOrdersMap.get(listDays.get(position));
-        holder.textTime.setText(listDays.get(position));
+
+        SimpleDateFormat formatter = new SimpleDateFormat("E MMM dd yyyy");
+        Date date = new Date();
+        String strNow = formatter.format(date);
+        if (strNow.equals(listDays.get(position))) {
+            holder.textTime.setText("Today");
+        } else {
+            holder.textTime.setText(listDays.get(position));
+        }
+
         if (listTrips != null) {
             if (!listTrips.isEmpty()) {
-                holder.textNumOrders.setText(listTrips.size() + " orders complete");
-//                String totalMoney = Calculator.calculateTotalMoney(listTrips);
-//                holder.textMoney.setText("đ " + totalMoney);
+                if (listTrips.size() == 1) {
+                    holder.textNumOrders.setText(listTrips.size() + " order completed");
+                } else {
+                    holder.textNumOrders.setText(listTrips.size() + " orders completed");
+                }
+                String totalMoney = Calculator.calculateTotalMoney(listTrips, context);
+                holder.textMoney.setText(totalMoney);
             }
         }
     }

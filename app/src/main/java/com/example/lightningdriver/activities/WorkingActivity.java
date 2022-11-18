@@ -51,6 +51,7 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
     TextView textAvailableStatus;
     CircleImageView imgProfile, imgVehicle;
     TextView textVehicleName, textPlateNumber;
+    AppCompatButton buttonIncome;
 
     private static final int ACCESS_FINE_LOCATION_REQUEST_CODE = 123;
     private static final int ACCESS_COARSE_LOCATION_REQUEST_CODE = 234;
@@ -167,10 +168,19 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
                 }
             }
         });
+
+        buttonIncome.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(WorkingActivity.this, DailyIncome.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void init() {
         buttonEnableConnection = findViewById(R.id.buttonEnable);
+        buttonIncome = findViewById(R.id.btnInCome);
         textAvailableStatus = findViewById(R.id.text_status);
         textPlateNumber = findViewById(R.id.text_plateNumber);
         textVehicleName = findViewById(R.id.text_vehicleName);

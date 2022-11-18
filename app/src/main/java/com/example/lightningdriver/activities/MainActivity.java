@@ -30,7 +30,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
 
-    FrameLayout btnWorking, buttonCurrentOrder, buttonHistory;
+    FrameLayout btnWorking, buttonCurrentOrder, buttonHistory, buttonIncome;
     CircleImageView imageProfile;
 
     ProgressDialog progressDialog;
@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        buttonHistory.setOnClickListener(new View.OnClickListener() {
+        buttonIncome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, DailyIncome.class);
@@ -123,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
         btnWorking = findViewById(R.id.buttonWorking);
         buttonCurrentOrder = findViewById(R.id.buttonCurrentOrder);
         buttonHistory = findViewById(R.id.buttonHistory);
+        buttonIncome = findViewById(R.id.buttonInCome);
         imageProfile = findViewById(R.id.img_profile);
 
         progressDialog = new ProgressDialog(this);
