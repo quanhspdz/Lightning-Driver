@@ -49,6 +49,7 @@ public class DailyIncomeAdapter extends RecyclerView.Adapter<DailyIncomeAdapter.
         String strNow = formatter.format(date);
         if (strNow.equals(listDays.get(position))) {
             holder.textTime.setText("Today");
+            holder.textTime.setTextColor(context.getResources().getColor(R.color.green));
         } else {
             holder.textTime.setText(listDays.get(position));
         }
