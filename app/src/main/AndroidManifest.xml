@@ -23,6 +23,13 @@
         android:theme="@style/Theme.LightningDriver"
         tools:targetApi="31">
         <activity
+            android:name=".activities.IncomeDetail"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".activities.DailyIncome"
             android:exported="false">
             <meta-data
