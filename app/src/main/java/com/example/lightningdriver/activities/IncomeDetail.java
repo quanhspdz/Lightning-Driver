@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public class IncomeDetail extends AppCompatActivity {
@@ -64,7 +65,7 @@ public class IncomeDetail extends AppCompatActivity {
         Intent intent = getIntent();
         ordersDay = intent.getStringExtra("Day");
 
-        SimpleDateFormat formatter = new SimpleDateFormat("E MMM dd yyyy");
+        SimpleDateFormat formatter = new SimpleDateFormat("E MMM dd yyyy", Locale.US);
         Date date = new Date();
         if (ordersDay == null) {
             ordersDay = formatter.format(date);
