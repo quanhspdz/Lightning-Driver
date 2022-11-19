@@ -83,7 +83,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallback {
     TextView textPassengerName, textPickUp, textMoney, textPaymentMethod, textStatus;
     RelativeLayout layoutCall, layoutChat, layoutTripInfo, layoutBottom;
-    AppCompatButton buttonArrived, buttonCancel;
+    AppCompatButton buttonArrived, buttonCancel, buttonIncome;
     CircleImageView imgFocusOnMe;
     ImageView imgDriver;
     RelativeLayout layoutStatus;
@@ -258,6 +258,14 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                 cancelTrip();
 
                 return false;
+            }
+        });
+
+        buttonIncome.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(PickUpActivity.this, IncomeDetail.class);
+                startActivity(intent);
             }
         });
     }
@@ -516,6 +524,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
         imgDriver = findViewById(R.id.img_profile);
         layoutStatus = findViewById(R.id.layout_statusUpdate);
         buttonCancel = findViewById(R.id.buttonCancel);
+        buttonIncome = findViewById(R.id.btnInCome);
 
         setUpFocusButton();
 

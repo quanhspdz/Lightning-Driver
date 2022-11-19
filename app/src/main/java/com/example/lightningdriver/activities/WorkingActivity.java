@@ -172,7 +172,7 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
         buttonIncome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(WorkingActivity.this, DailyIncome.class);
+                Intent intent = new Intent(WorkingActivity.this, IncomeDetail.class);
                 startActivity(intent);
             }
         });
