@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <FrameLayout
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:id="@+id/frame_vehicle"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginVertical="15dp"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/menu_background">
+
+            <ImageView
+                android:layout_width="55dp"
+                android:layout_height="55dp"
+                android:layout_gravity="center"
+                android:id="@+id/img_vehicle"
+                android:src="@drawable/shipper" />
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="40 880 đ"
+            android:id="@+id/text_money"
+            android:layout_toEndOf="@id/frame_vehicle"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="15dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="18:41 - 19:17"
+            android:textColor="@color/secondary_text"
+            android:layout_toEndOf="@id/frame_vehicle"
+            android:layout_below="@id/text_money"
+            android:textSize="17sp"
+            android:id="@+id/text_duration"
+            android:layout_marginTop="10dp"/>
+
+        <ImageView
+            android:id="@+id/img_dot"
+            android:layout_width="6dp"
+            android:layout_height="6dp"
+            android:layout_below="@id/text_money"
+            android:layout_marginVertical="20dp"
+            android:layout_marginHorizontal="10dp"
+            android:layout_toEndOf="@id/text_duration"
+            android:src="@drawable/ic_dot" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="9.63 km"
+            android:textColor="@color/secondary_text"
+            android:layout_toEndOf="@id/img_dot"
+            android:layout_below="@id/text_money"
+            android:textSize="17sp"
+            android:id="@+id/text_distance"
+            android:layout_marginTop="10dp"/>
+
+        <TextView
+            android:id="@+id/text_paymentMethod"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/button_background_green"
+            android:paddingHorizontal="10dp"
+            android:text="Cash"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/frame_vehicle"
+            android:layout_marginStart="20dp"
+            android:id="@+id/frame_middle_line"
+            android:layout_marginEnd="20dp"
+            android:background="@color/grey_line"/>
+
+        <ImageView
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:src="@drawable/ic_dot_green"
+            android:id="@+id/img_dot_green"
+            android:layout_below="@id/frame_middle_line"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginStart="35dp"
+            android:layout_marginBottom="5dp"/>
+
+        <FrameLayout
+            android:layout_width="1dp"
+            android:layout_height="30dp"
+            android:background="@color/grey_line"
+            android:layout_below="@id/img_dot_green"
+            android:layout_marginStart="-28dp"
+            android:layout_toEndOf="@id/img_dot_green"
+            android:id="@+id/frame_vertical"/>
+
+        <ImageView
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:src="@drawable/ic_dot_orange"
+            android:id="@+id/img_dot_orange"
+            android:layout_below="@id/frame_vertical"
+            android:layout_marginTop="8dp"
+            android:layout_toEndOf="@id/img_dot_green"
+            android:layout_marginStart="-35dp"
+            android:layout_marginBottom="5dp"/>
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="20 Pham Hung, My Dinh, Nam Tu Liem"
+            android:singleLine="true"
+            android:layout_toEndOf="@id/img_dot_green"
+            android:layout_below="@id/frame_middle_line"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="20dp"
+            android:textSize="17sp"
+            android:textColor="@color/secondary_text"
+            android:id="@+id/text_pick_up_location"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="144 Xuan Thuy, Dich Vong Hau, Cau Giay"
+            android:singleLine="true"
+            android:layout_toEndOf="@id/img_dot_green"
+            android:layout_below="@id/frame_vertical"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="20dp"
+            android:textSize="17sp"
+            android:textColor="@color/secondary_text"
+            android:id="@+id/text_drop_off_location"/>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="15dp"
+            android:background="@color/grey_line"
+            android:layout_below="@id/img_dot_orange"/>
+
+
+    </RelativeLayout>
+
+</RelativeLayout>
