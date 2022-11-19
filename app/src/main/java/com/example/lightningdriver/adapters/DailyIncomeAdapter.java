@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -47,7 +48,7 @@ public class DailyIncomeAdapter extends RecyclerView.Adapter<DailyIncomeAdapter.
         List<Trip> listTrips = listOrdersMap.get(listDays.get(position));
         String day = listDays.get(position);
 
-        SimpleDateFormat formatter = new SimpleDateFormat("E MMM dd yyyy");
+        SimpleDateFormat formatter = new SimpleDateFormat("E MMM dd yyyy", Locale.US);
         Date date = new Date();
         String strNow = formatter.format(date);
         if (strNow.equals(listDays.get(position))) {
