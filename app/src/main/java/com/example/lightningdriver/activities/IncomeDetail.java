@@ -7,6 +7,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,10 +32,11 @@ import java.util.Objects;
 public class IncomeDetail extends AppCompatActivity {
 
     RecyclerView recyclerViewOrders;
+    RelativeLayout layoutBack;
     List<Trip> listTrips;
     String ordersDay;
     IncomeDetailAdapter incomeDetailAdapter;
-    TextView textTotalMoney;
+    TextView textTotalMoney, textDay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,16 +45,31 @@ public class IncomeDetail extends AppCompatActivity {
 
         init();
         getListTrip();
+        listener();
+    }
+
+    private void listener() {
+        layoutBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(IncomeDetail.this, DailyIncome.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 
     private void getListTrip() {
         Intent intent = getIntent();
         ordersDay = intent.getStringExtra("Day");
 
+        SimpleDateFormat formatter = new SimpleDateFormat("E MMM dd yyyy");
+        Date date = new Date();
         if (ordersDay == null) {
-            SimpleDateFormat formatter = new SimpleDateFormat("E MMM dd yyyy");
-            Date date = new Date();
             ordersDay = formatter.format(date);
+        } else if (!ordersDay.equals(formatter.format(date))) {
+            textDay.setText(ordersDay);
         }
 
         FirebaseDatabase.getInstance().getReference()
@@ -94,6 +112,8 @@ public class IncomeDetail extends AppCompatActivity {
 
     private void init() {
         textTotalMoney = findViewById(R.id.text_total_money);
+        textDay = findViewById(R.id.text_day);
+        layoutBack = findViewById(R.id.layout_back);
 
         listTrips = new ArrayList<>();
         incomeDetailAdapter = new IncomeDetailAdapter(listTrips, this);

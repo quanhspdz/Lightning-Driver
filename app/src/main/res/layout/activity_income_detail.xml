@@ -31,7 +31,7 @@
                 android:text="Today"
                 android:id="@+id/text_day"
                 android:layout_centerVertical="true"
-                android:textSize="26sp"
+                android:textSize="22sp"
                 android:textColor="@color/white"
                 android:textStyle="bold"
                 android:layout_toEndOf="@id/button_back"
