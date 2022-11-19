@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.lightningdriver.R;
@@ -32,6 +33,7 @@ public class IncomeDetail extends AppCompatActivity {
     List<Trip> listTrips;
     String ordersDay;
     IncomeDetailAdapter incomeDetailAdapter;
+    TextView textTotalMoney;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +67,7 @@ public class IncomeDetail extends AppCompatActivity {
                             }
                         }
                         incomeDetailAdapter.notifyDataSetChanged();
+                        textTotalMoney.setText(Calculator.calculateTotalMoney(listTrips, getApplicationContext()));
                     }
 
                     @Override
@@ -90,6 +93,8 @@ public class IncomeDetail extends AppCompatActivity {
     }
 
     private void init() {
+        textTotalMoney = findViewById(R.id.text_total_money);
+
         listTrips = new ArrayList<>();
         incomeDetailAdapter = new IncomeDetailAdapter(listTrips, this);
 

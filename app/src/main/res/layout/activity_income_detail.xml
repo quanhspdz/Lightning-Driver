@@ -37,6 +37,18 @@
                 android:layout_toEndOf="@id/button_back"
                 android:layout_marginStart="10dp"/>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="57.120 đ"
+                android:id="@+id/text_total_money"
+                android:layout_centerVertical="true"
+                android:textSize="26sp"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="20dp"/>
+
         </RelativeLayout>
 
     </androidx.appcompat.widget.Toolbar>
