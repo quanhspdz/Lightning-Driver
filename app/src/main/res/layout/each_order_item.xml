@@ -94,7 +94,7 @@
             android:layout_marginBottom="20dp"
             android:background="@drawable/button_background_green"
             android:paddingHorizontal="10dp"
-            android:text="Ended"
+            android:text="In progress"
             android:textStyle="bold"
             android:textColor="@color/white"
             android:textSize="20sp" />

@@ -36,12 +36,16 @@ public class Calculator {
     }
 
     public static String getDurationFromTime(String pickUpTime, String dropOffTime) {
-        pickUpTime = pickUpTime.substring(0, pickUpTime.indexOf("GMT") - 1);
-        dropOffTime = dropOffTime.substring(0, dropOffTime.indexOf("GMT") - 1);
+        if (dropOffTime != null) {
+            pickUpTime = pickUpTime.substring(0, pickUpTime.indexOf("GMT") - 1);
+            dropOffTime = dropOffTime.substring(0, dropOffTime.indexOf("GMT") - 1);
 
-        pickUpTime = pickUpTime.substring(pickUpTime.lastIndexOf(" ") + 1, pickUpTime.lastIndexOf(":"));
-        dropOffTime = dropOffTime.substring(dropOffTime.lastIndexOf(" ") + 1, dropOffTime.lastIndexOf(":"));
-
-        return pickUpTime + " - " + dropOffTime;
+            pickUpTime = pickUpTime.substring(pickUpTime.lastIndexOf(" ") + 1, pickUpTime.lastIndexOf(":"));
+            dropOffTime = dropOffTime.substring(dropOffTime.lastIndexOf(" ") + 1, dropOffTime.lastIndexOf(":"));
+            return pickUpTime + " - " + dropOffTime;
+        } else {
+            pickUpTime = pickUpTime.substring(0, pickUpTime.indexOf("GMT") - 1);
+            return pickUpTime;
+        }
     }
 }
