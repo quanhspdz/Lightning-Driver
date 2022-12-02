@@ -30,7 +30,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
 
-    FrameLayout btnWorking, buttonCurrentOrder, buttonHistory, buttonIncome;
+    FrameLayout btnWorking, buttonCurrentOrder, buttonHistory, buttonIncome, buttonWallet;
     CircleImageView imageProfile;
 
     ProgressDialog progressDialog;
@@ -125,6 +125,14 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        buttonWallet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, WalletActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void init() {
@@ -133,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
         buttonHistory = findViewById(R.id.buttonHistory);
         buttonIncome = findViewById(R.id.buttonInCome);
         imageProfile = findViewById(R.id.img_profile);
+        buttonWallet = findViewById(R.id.buttonLWallet);
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Loading...");

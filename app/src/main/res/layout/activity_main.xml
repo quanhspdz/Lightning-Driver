@@ -235,15 +235,15 @@
                     <FrameLayout
                         android:layout_width="70dp"
                         android:layout_height="70dp"
-                        android:id="@+id/buttonVehicleInfo"
+                        android:id="@+id/buttonLWallet"
                         android:background="@drawable/menu_background"
                         android:layout_centerHorizontal="true">
 
                         <ImageView
-                            android:layout_width="65dp"
-                            android:layout_height="65dp"
+                            android:layout_width="62dp"
+                            android:layout_height="62dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/vehicle_info" />
+                            android:src="@drawable/wallet_new" />
 
                     </FrameLayout>
 
@@ -251,7 +251,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
-                        android:text="Vehicle"
+                        android:text="L-Wallet"
                         android:layout_marginBottom="10dp"
                         android:layout_centerHorizontal="true"/>
 
