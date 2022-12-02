@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -136,7 +137,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     private final int CALL_REQUEST_CODE = 123;
     private final int SMS_REQUEST_CODE = 234;
 
-    boolean movedToWorking = false;
+    boolean movedToWorking = false, cancelable = true;
 
 
     @Override
@@ -332,8 +333,15 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
         } else if (status.equals(Const.onGoing)) {
             arrivedToPickUpPoint = true;
             passengerIsReady = true;
+            cancelable = false;
             textStatus.setText("Going to drop-off point");
             buttonArrived.setText("Arrived");
+
+            setMargins(buttonArrived, 0, 0, 0, 0);
+            buttonCancel.setVisibility(View.GONE);
+            ViewGroup.LayoutParams params = layoutTripInfo.getLayoutParams();
+            params.height = 800;
+            layoutTripInfo.setLayoutParams(params);
 
             if (!dropOffIsDrawn && pickUpIsDrawn) {
                 pickupPolyline.remove();
@@ -354,8 +362,15 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
             arrivedToPickUpPoint = true;
             passengerIsReady = true;
             arrivedToDropOff = true;
+            cancelable = false;
             textStatus.setText("Waiting for payment");
             buttonArrived.setText("Done");
+
+            setMargins(buttonArrived, 0, 0, 0, 0);
+            buttonCancel.setVisibility(View.GONE);
+            ViewGroup.LayoutParams params = layoutTripInfo.getLayoutParams();
+            params.height = 800;
+            layoutTripInfo.setLayoutParams(params);
 
             if (!dropOffIsDrawn && pickUpIsDrawn) {
                 pickupPolyline.remove();
@@ -858,6 +873,15 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                     }
                 });
     }
+
+    private void setMargins (View view, int left, int top, int right, int bottom) {
+        if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+            p.setMargins(left, top, right, bottom);
+            view.requestLayout();
+        }
+    }
+
 
     @Override
     protected void onStop() {
