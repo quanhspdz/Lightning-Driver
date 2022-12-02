@@ -468,6 +468,14 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
         }
         textMoney.setText(trip.getCost());
 
+        if (trip.getPaymentMethod() != null) {
+            if (trip.getPaymentMethod().equals(Const.cash)) {
+                textPaymentMethod.setText("Cash");
+            } else if (trip.getPaymentMethod().equals(Const.online)){
+                textPaymentMethod.setText("L-Wallet");
+            }
+        }
+
         FirebaseDatabase.getInstance().getReference().child("Passengers")
                 .child(trip.getPassengerId())
                 .addValueEventListener(new ValueEventListener() {
