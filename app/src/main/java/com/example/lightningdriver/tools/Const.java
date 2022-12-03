@@ -22,6 +22,7 @@ public class Const {
     public static final String finished = "finished";
 
     public static final String addMoney = "addMoneyToWallet";
+    public static final String paymentSuccessful = "paymentSuccessful";
 
     public static final String cash = "cash";
     public static final String online = "online";

@@ -198,7 +198,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                         updateStatus(Const.onGoing);
                     } else if (!arrivedToDropOff) {
                         updateStatus(Const.arrivedDropOff);
-                    } else {
+                    } else if (trip.getStatus().equals(Const.paymentSuccessful)){
                         updateStatus(Const.success);
                         Intent intent = new Intent(PickUpActivity.this, WorkingActivity.class);
                         Toast.makeText(PickUpActivity.this, "Done!", Toast.LENGTH_SHORT).show();
@@ -364,6 +364,36 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
             arrivedToDropOff = true;
             cancelable = false;
             textStatus.setText("Waiting for payment");
+            buttonArrived.setText("Done");
+
+            setMargins(buttonArrived, 0, 0, 0, 0);
+            buttonCancel.setVisibility(View.GONE);
+            ViewGroup.LayoutParams params = layoutTripInfo.getLayoutParams();
+            params.height = 800;
+            layoutTripInfo.setLayoutParams(params);
+
+            if (!dropOffIsDrawn && pickUpIsDrawn) {
+                pickupPolyline.remove();
+                try {
+                    direction(
+                            DecodeTool.getLatLngFromString(trip.getPickUpLocation()),
+                            DecodeTool.getLatLngFromString(trip.getDropOffLocation()),
+                            "drop-off"
+                    );
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                dropOffIsDrawn = true;
+            }
+            textPickUp.setText(trip.getDropOffName());
+        }
+
+        else if (status.equals(Const.paymentSuccessful)) {
+            arrivedToPickUpPoint = true;
+            passengerIsReady = true;
+            arrivedToDropOff = true;
+            cancelable = false;
+            textStatus.setText("Payment successfully done!");
             buttonArrived.setText("Done");
 
             setMargins(buttonArrived, 0, 0, 0, 0);
@@ -746,7 +776,8 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
     private void drawRoute(LatLng driverPos, LatLng origin, LatLng destination) throws IOException {
         if (trip.getStatus().equals(Const.waitingPickUp) || trip.getStatus().equals(Const.driverArrivedPickUp)) {
             direction(driverPos, origin, "pick-up");
-        } else if (trip.getStatus().equals(Const.onGoing) || trip.getStatus().equals(Const.arrivedDropOff)) {
+        } else if (trip.getStatus().equals(Const.onGoing) || trip.getStatus().equals(Const.arrivedDropOff)
+                || trip.getStatus().equals(Const.paymentSuccessful)) {
             direction(origin, destination, "drop-off");
         }
     }
