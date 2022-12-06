@@ -13,7 +13,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.lightningdriver.R;
+import com.example.lightningdriver.adapters.TransactionAdapter;
 import com.example.lightningdriver.models.Transaction;
 import com.example.lightningdriver.tools.Const;
 import com.example.lightningdriver.tools.Tool;
@@ -44,6 +48,10 @@ public class WalletActivity extends AppCompatActivity {
 
     boolean addMoneyIsChosen, historyIsChosen;
 
+    RecyclerView recyclerTransHistory;
+    TransactionAdapter transactionAdapter;
+    List<Transaction> transactionList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,11 +78,24 @@ public class WalletActivity extends AppCompatActivity {
         textHistory = findViewById(R.id.text_history);
         relativeBack = findViewById(R.id.relative_back);
         textBalance = findViewById(R.id.text_money);
+        recyclerTransHistory = findViewById(R.id.recycler_history);
 
         addMoneyIsChosen = true;
         historyIsChosen = false;
 
         progressDialog = new ProgressDialog(this);
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setStackFromEnd(true);
+        linearLayoutManager.setReverseLayout(true);
+        recyclerTransHistory.setHasFixedSize(true);
+        recyclerTransHistory.setLayoutManager(linearLayoutManager);
+
+        transactionList = new ArrayList<>();
+        String userId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+        transactionAdapter = new TransactionAdapter(transactionList, this, userId);
+
+        recyclerTransHistory.setAdapter(transactionAdapter);
     }
 
     private void listener() {
@@ -214,8 +235,10 @@ public class WalletActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         listReceiveTrans.clear();
                         listSendTrans.clear();
+                        transactionList.clear();
                         for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                             Transaction transaction = dataSnapshot.getValue(Transaction.class);
+                            transactionList.add(transaction);
                             String userId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
                             if (transaction != null) {
                                 if (transaction.getNote().equals(Const.addMoney) && transaction.getSenderId().equals(userId)) {
@@ -231,6 +254,7 @@ public class WalletActivity extends AppCompatActivity {
 
                         String totalBalance = getTotalBalance(listReceiveTrans, listSendTrans);
                         textBalance.setText(totalBalance);
+                        transactionAdapter.notifyDataSetChanged();
                     }
 
                     @Override
