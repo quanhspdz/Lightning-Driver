@@ -55,7 +55,7 @@
         android:background="@drawable/circle_image_background"
         android:layout_below="@id/toolBar"
         android:layout_marginTop="30dp"
-        android:layout_centerHorizontal="true"
+       android:layout_marginStart="30dp"
         android:src="@drawable/user_blue"
         android:id="@+id/img_profile"/>
 
@@ -63,12 +63,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Nguyen Van A"
-        android:layout_below="@id/img_profile"
-        android:layout_centerHorizontal="true"
+        android:layout_below="@id/toolBar"
+        android:layout_toEndOf="@id/img_profile"
+        android:layout_marginStart="20dp"
         android:textStyle="bold"
         android:textSize="22sp"
         android:textColor="@color/white"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="60dp"
         android:id="@+id/text_userName"/>
 
     <RelativeLayout
@@ -185,7 +186,7 @@
             <androidx.appcompat.widget.AppCompatButton
                 android:layout_width="match_parent"
                 android:layout_height="55dp"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="20dp"
                 android:background="@drawable/button_background_red"
                 android:text="Sign out"
                 android:textSize="20sp"
