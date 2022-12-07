@@ -2,15 +2,16 @@ package com.example.lightningdriver.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
+import androidx.appcompat.widget.AppCompatButton;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.lightningdriver.R;
@@ -28,40 +29,29 @@ import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class MainActivity extends AppCompatActivity {
+public class SettingActivity extends AppCompatActivity {
 
-    FrameLayout btnWorking, buttonCurrentOrder, buttonHistory, buttonIncome, buttonWallet, buttonSetting;
-    CircleImageView imageProfile;
-
-    ProgressDialog progressDialog;
-
-    public static boolean pickUpActivityIsStart = false;
+    CircleImageView imgProfile;
+    TextView textName;
+    RelativeLayout layoutCurrentOrder, layoutHistory, layoutWallet, layoutBack, layoutIncome;
+    AppCompatButton buttonSignOut;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_setting);
 
-        setStatusBarColor();
         init();
-        getDriverInfo();
+        loadUserData();
         listener();
-
     }
 
     private void listener() {
-        btnWorking.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, WorkingActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        buttonCurrentOrder.setOnClickListener(new View.OnClickListener() {
+        layoutCurrentOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String driverId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+                ProgressDialog progressDialog = new ProgressDialog(SettingActivity.this);
                 progressDialog.show();
                 FirebaseDatabase.getInstance().getReference().child("Trips")
                         .addValueEventListener(new ValueEventListener() {
@@ -80,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
                                                     && !trip.getStatus().equals(Const.cancelByPassenger)
                                                     && !trip.getStatus().equals(Const.cancelByDriver)
                                                     && !PickUpActivity.isRunning) {
-                                                Intent intent = new Intent(MainActivity.this, PickUpActivity.class);
+                                                Intent intent = new Intent(SettingActivity.this, PickUpActivity.class);
                                                 intent.putExtra("tripId", trip.getId());
                                                 startActivity(intent);
                                                 progressDialog.dismiss();
@@ -92,80 +82,58 @@ public class MainActivity extends AppCompatActivity {
 
                             @Override
                             public void onCancelled(@NonNull DatabaseError error) {
-                                Toast.makeText(MainActivity.this, "No current order!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(SettingActivity.this, "No current order!", Toast.LENGTH_SHORT).show();
                                 progressDialog.dismiss();
                             }
                         });
             }
         });
 
-        imageProfile.setOnLongClickListener(new View.OnLongClickListener() {
+        layoutHistory.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onLongClick(View v) {
-                FirebaseAuth.getInstance().signOut();
-                Intent intent = new Intent(MainActivity.this, WelcomeActivity.class);
+            public void onClick(View v) {
+                Intent intent = new Intent(SettingActivity.this, OrderHistory.class);
                 startActivity(intent);
-                Toast.makeText(MainActivity.this, "Sign out", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        layoutWallet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SettingActivity.this, WalletActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        layoutBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
                 finish();
-                return false;
             }
         });
 
-        imageProfile.setOnClickListener(new View.OnClickListener() {
+        buttonSignOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, SettingActivity.class);
+                FirebaseAuth.getInstance().signOut();
+                Intent intent = new Intent(SettingActivity.this, WelcomeActivity.class);
                 startActivity(intent);
+                Toast.makeText(SettingActivity.this, "Sign out", Toast.LENGTH_SHORT).show();
+                finish();
             }
         });
 
-        buttonIncome.setOnClickListener(new View.OnClickListener() {
+        layoutIncome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, DailyIncome.class);
-                startActivity(intent);
-            }
-        });
-
-        buttonHistory.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, OrderHistory.class);
-                startActivity(intent);
-            }
-        });
-
-        buttonWallet.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, WalletActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        buttonSetting.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, SettingActivity.class);
+                Intent intent = new Intent(SettingActivity.this, DailyIncome.class);
                 startActivity(intent);
             }
         });
     }
 
-    private void init() {
-        btnWorking = findViewById(R.id.buttonWorking);
-        buttonCurrentOrder = findViewById(R.id.buttonCurrentOrder);
-        buttonHistory = findViewById(R.id.buttonHistory);
-        buttonIncome = findViewById(R.id.buttonInCome);
-        imageProfile = findViewById(R.id.img_profile);
-        buttonWallet = findViewById(R.id.buttonLWallet);
-        buttonSetting = findViewById(R.id.buttonSettings);
-
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Loading...");
-    }
-
-    private void getDriverInfo() {
+    private void loadUserData() {
         FirebaseDatabase.getInstance().getReference()
                 .child("Drivers")
                 .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
@@ -174,11 +142,11 @@ public class MainActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         Driver driver = snapshot.getValue(Driver.class);
                         if (driver != null) {
-                            Picasso.get().load(driver.getDriverImageUrl())
-                                    .resize(1000, 1000)
-                                            .centerCrop().into(imageProfile);
+                            textName.setText(driver.getName());
 
-                            checkVehicleRegistration(driver);
+                            Picasso.get().load(driver.getDriverImageUrl())
+                                    .placeholder(R.drawable.user_blue)
+                                    .into(imgProfile);
                         }
                     }
 
@@ -187,26 +155,17 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 });
+
     }
 
-    private void checkVehicleRegistration(Driver driver) {
-        if (driver.getVehicleId() == null) {
-            Intent intent = new Intent(MainActivity.this, VehicleRegistrationActivity.class);
-            startActivity(intent);
-            finish();
-        }
-    }
-
-    private void setStatusBarColor() {
-        Window window = this.getWindow();
-
-// clear FLAG_TRANSLUCENT_STATUS flag:
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-
-// add FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS flag to the window
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-
-// finally change the color
-        window.setStatusBarColor(ContextCompat.getColor(this, R.color.blue_toolbar));
+    private void init() {
+        imgProfile = findViewById(R.id.img_profile);
+        textName = findViewById(R.id.text_userName);
+        layoutCurrentOrder = findViewById(R.id.layout_currentOrder);
+        layoutHistory = findViewById(R.id.layout_History);
+        layoutWallet = findViewById(R.id.layout_lWallet);
+        buttonSignOut = findViewById(R.id.button_sign_out);
+        layoutBack = findViewById(R.id.relative_back);
+        layoutIncome = findViewById(R.id.layout_Income);
     }
 }

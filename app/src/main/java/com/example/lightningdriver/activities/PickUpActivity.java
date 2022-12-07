@@ -269,6 +269,14 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                 startActivity(intent);
             }
         });
+
+        imgDriver.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(PickUpActivity.this, SettingActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void cancelTrip() {

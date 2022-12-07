@@ -176,6 +176,14 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
                 startActivity(intent);
             }
         });
+
+        imgProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(WorkingActivity.this, SettingActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void init() {
