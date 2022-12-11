@@ -238,16 +238,19 @@ public class WalletActivity extends AppCompatActivity {
                         transactionList.clear();
                         for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                             Transaction transaction = dataSnapshot.getValue(Transaction.class);
-                            transactionList.add(transaction);
                             String userId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
                             if (transaction != null) {
                                 if (transaction.getNote().equals(Const.addMoney) && transaction.getSenderId().equals(userId)) {
                                     listReceiveTrans.add(transaction);
+                                    transactionList.add(transaction);
                                 } else if (transaction.getSenderId().equals(userId)) {
                                     listSendTrans.add(transaction);
+                                    transactionList.add(transaction);
                                 } else if (transaction.getReceiverId() != null) {
-                                    if (transaction.getReceiverId().equals(userId))
+                                    if (transaction.getReceiverId().equals(userId)) {
                                         listReceiveTrans.add(transaction);
+                                        transactionList.add(transaction);
+                                    }
                                 }
                             }
                         }
